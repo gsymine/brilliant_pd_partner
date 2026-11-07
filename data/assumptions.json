@@ -1,0 +1,23 @@
+{
+  "_note": "Illustrative planning assumptions for the hackathon demo. Duty/tariff rates are NOT verified; check the current HTSUS before real use.",
+  "today": "2026-11-07",
+  "po_date": "2026-12-01",
+  "in_store_date": "2027-03-15",
+  "receiving_buffer_days": 7,
+  "target_imu": 0.65,
+  "fx_to_usd": {"USD": 1.0, "CNY": 0.14, "INR": 0.012, "EUR": 1.08},
+  "freight_per_unit_usd": {
+    "A": {"CN": 0.95, "VN": 1.05, "PT": 1.60, "IN": 1.10},
+    "B": {"CN": 0.30, "VN": 0.32, "PT": 0.45, "IN": 0.35}
+  },
+  "transit_days": {"CN": 30, "VN": 32, "PT": 18, "IN": 38},
+  "duty_rate": {
+    "A": {"CN": 0.06, "VN": 0.06, "PT": 0.06, "IN": 0.06},
+    "B": {"CN": 0.119, "VN": 0.119, "PT": 0.119, "IN": 0.119}
+  },
+  "extra_tariff_rate": {"CN": 0.25, "VN": 0.0, "PT": 0.0, "IN": 0.0},
+  "extra_dev_days": {"accept": 0, "modify": 21, "co_develop": 45},
+  "extra_dev_cost_usd": {"accept": 0, "modify": 400, "co_develop": 1500},
+  "excess_salvage_rate": 0.30,
+  "_salvage_note": "Units above forecast are assumed to recover 30% of landed cost (deep markdown / off-price)."
+}

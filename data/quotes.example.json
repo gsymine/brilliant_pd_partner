@@ -1,0 +1,22 @@
+[
+  {"vendor": "Jingde Ceramics", "sku": "A", "item": "Ceramic table vase", "country": "CN", "currency": "USD",
+   "unit_price": 6.20, "moq": 3000, "production_days": 55, "sampling_days": 10, "path": "accept",
+   "extra_costs_usd": 0, "spec_issues": ["Oat glaze not yet developed (+2 wks test)"],
+   "notes": "Min 1,000/colour; ISTA 1A passed; sample $80 refundable"},
+  {"vendor": "Hanoi Clayworks", "sku": "A", "item": "Ceramic table vase", "country": "VN", "currency": "USD",
+   "unit_price": 7.10, "moq": 1000, "production_days": 45, "sampling_days": 14, "path": "accept",
+   "extra_costs_usd": 250, "spec_issues": ["No ISTA 1A test yet (lab test ~$250 included in one-off)"],
+   "notes": "Sea-glass variant $7.60 / 50 days; mould change $350"},
+  {"vendor": "Porto Atelier", "sku": "A", "item": "Ceramic table vase", "country": "PT", "currency": "EUR",
+   "unit_price": 11.50, "moq": null, "production_days": 28, "sampling_days": 7, "path": "accept",
+   "extra_costs_usd": 65, "spec_issues": ["Hand-thrown: glaze varies piece to piece", "Capacity unclear for 1,800 units"],
+   "notes": "50/50 payment; sample EUR 60"},
+  {"vendor": "Panipat Linens", "sku": "B", "item": "Linen throw pillow cover", "country": "IN", "currency": "INR",
+   "unit_price": 385, "moq": 1500, "production_days": 60, "sampling_days": 12, "path": "accept",
+   "extra_costs_usd": 0, "spec_issues": [],
+   "notes": "MOQ 500/colour x 3 colours; 100% linen; OEKO-TEX certified"},
+  {"vendor": "Ningbo Hometex", "sku": "B", "item": "Linen throw pillow cover", "country": "CN", "currency": "CNY",
+   "unit_price": 22, "moq": 2000, "production_days": 35, "sampling_days": 7, "path": "accept",
+   "extra_costs_usd": 0, "meets_spec": false, "spec_issues": ["Only 45% linen (spec requires >=55%)", "No OEKO-TEX certificate yet"],
+   "notes": "BSCI audited; colours can be pantone matched"}
+]
