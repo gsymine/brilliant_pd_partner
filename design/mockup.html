@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brilliant PD Partner — Drinkware (mockup)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#fff; --ink:#1d2433; --muted:#6b7385; --line:#e3e6ec;
+    --accent:#0f766e; --accent-soft:#e6f4f2; --warn:#b45309; --warn-soft:#fdf3e4;
+    --bad:#b91c1c; --bad-soft:#fdecec; --good:#15803d; --good-soft:#e8f6ec; --blue:#1d4ed8; --blue-soft:#eaf0fd;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+  .app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+  /* Sidebar */
+  aside{background:#121826;color:#cfd6e4;padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+  .brand{color:#fff;font-weight:700;font-size:15px;padding:4px 10px 2px}
+  .brand small{display:block;color:#8a93a6;font-weight:400;font-size:12px}
+  .round-pick{margin:14px 6px 10px;background:#1c2436;border-radius:8px;padding:10px;font-size:12px}
+  .round-pick b{color:#fff;display:block;font-size:13px}
+  .nav-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6f7890;padding:12px 10px 4px}
+  .nav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;color:#cfd6e4;text-decoration:none;cursor:pointer}
+  .nav a:hover{background:#1c2436}
+  .nav a.active{background:var(--accent);color:#fff}
+  .nav .step{width:20px;height:20px;border-radius:50%;background:#2a3348;display:grid;place-items:center;font-size:11px;flex:none}
+  .nav a.active .step{background:#fff;color:var(--accent)}
+  .nav .badge{margin-left:auto;background:#f59e0b;color:#111;border-radius:10px;padding:0 7px;font-size:11px;font-weight:600}
+  .mock-note{margin-top:auto;font-size:11px;color:#6f7890;padding:10px}
+  /* Main */
+  main{padding:22px 28px 40px;overflow:auto}
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+  h1{font-size:21px;margin:0}
+  .sub{color:var(--muted);margin-top:2px}
+  h2{font-size:15px;margin:0 0 10px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .g-main{grid-template-columns:2fr 1fr}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+  .kpi .v{font-size:24px;font-weight:700} .kpi .l{color:var(--muted);font-size:12px}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 12px;font:inherit;cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:disabled{background:#9bbfba;border-color:#9bbfba;cursor:not-allowed}
+  .btn.sm{padding:4px 9px;font-size:12px}
+  .pill{display:inline-block;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+  .p-good{background:var(--good-soft);color:var(--good)} .p-warn{background:var(--warn-soft);color:var(--warn)}
+  .p-bad{background:var(--bad-soft);color:var(--bad)} .p-blue{background:var(--blue-soft);color:var(--blue)}
+  .p-grey{background:#eef0f4;color:#4b5365}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;border-bottom:1px solid var(--line);padding:8px 8px;white-space:nowrap;background:#fafbfc;position:sticky;top:0}
+  td{border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+  tr.click{cursor:pointer} tr.click:hover td{background:#f8fafb} tr.sel td{background:var(--accent-soft)}
+  .muted{color:var(--muted)} .right{text-align:right} .num{font-variant-numeric:tabular-nums}
+  .bar{height:8px;background:#e9ecf1;border-radius:6px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:var(--accent)}
+  .threshold{position:relative}
+  .threshold .mark{position:absolute;top:-4px;bottom:-4px;width:2px;background:#111}
+  .stepper{display:flex;gap:0;margin:4px 0 2px}
+  .stepper div{flex:1;text-align:center;font-size:12px;padding:8px 4px;border-bottom:3px solid var(--line);color:var(--muted)}
+  .stepper .done{border-color:var(--accent);color:var(--accent)} .stepper .now{border-color:#f59e0b;color:#111;font-weight:600}
+  .feed{list-style:none;margin:0;padding:0}
+  .feed li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .feed .t{color:var(--muted);font-size:12px;width:52px;flex:none}
+  .dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none}
+  .email{background:#fbfbfc;border:1px solid var(--line);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;white-space:pre-wrap;max-height:430px;overflow:auto}
+  .field{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);align-items:center}
+  .field .k{color:var(--muted);font-size:12px}
+  .field.missing .v{color:var(--bad);font-weight:600}
+  .conf{font-size:11px;text-align:right}
+  textarea,input[type=text],select{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit;background:#fff}
+  textarea{min-height:120px;resize:vertical}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:12px;background:#fff}
+  .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  .slider{display:grid;grid-template-columns:130px 1fr 34px;gap:8px;align-items:center;font-size:13px;padding:3px 0}
+  input[type=range]{accent-color:var(--accent)}
+  .score{font-weight:700;font-size:15px}
+  .minibar{display:inline-block;width:46px;height:6px;background:#e9ecf1;border-radius:4px;vertical-align:middle;margin-right:4px;overflow:hidden}
+  .minibar i{display:block;height:100%;background:var(--accent)}
+  .trend{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+  .up{color:var(--good);font-weight:600} .down{color:var(--bad);font-weight:600}
+  .view{display:none} .view.active{display:block}
+  .row{display:flex;gap:8px;align-items:center}
+  .spacer{flex:1}
+  .callout{background:var(--accent-soft);border:1px solid #b7dcd7;border-radius:8px;padding:10px 12px;font-size:13px}
+  .callout.warn{background:var(--warn-soft);border-color:#f3d3a6}
+  .scroll{max-height:520px;overflow:auto}
+  code{background:#eef0f4;border-radius:4px;padding:0 4px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">Brilliant PD Partner<small>Drinkware product development</small></div>
+    <div class="round-pick"><span class="muted">Sourcing round</span><b>Spring 2027 · Insulated &amp; Glass</b>Launch 2027-04-01 · 10 vendors</div>
+    <nav class="nav">
+      <a data-view="overview" class="active"><span class="step">⌂</span>Overview<span class="badge">3</span></a>
+      <div class="nav-label">Workflow</div>
+      <a data-view="outreach"><span class="step">1</span>Brief &amp; outreach</a>
+      <a data-view="responses"><span class="step">2</span>Vendor responses<span class="badge">2</span></a>
+      <a data-view="database"><span class="step">3</span>Product database</a>
+      <a data-view="analysis"><span class="step">4</span>Analysis &amp; ranking</a>
+      <a data-view="decisions"><span class="step">5</span>Decisions</a>
+      <div class="nav-label">Setup</div>
+      <a data-view="schema"><span class="step">⚙</span>Data fields</a>
+      <a data-view="vendors"><span class="step">☰</span>Vendor directory</a>
+    </nav>
+    <div class="mock-note">Mockup · all vendors, prices and trends are fictional sample data</div>
+  </aside>
+
+  <main>
+    <!-- ============ OVERVIEW ============ -->
+    <section class="view active" id="overview">
+      <header class="top">
+        <div><h1>Spring 2027 · Insulated &amp; Glass</h1><div class="sub">Brief sent 2026-10-20 · Reply deadline 2026-11-10 · Analysis unlocks at 70% complete replies</div></div>
+        <button class="btn primary" onclick="go('analysis')">Start analysis →</button>
+      </header>
+      <div class="card" style="margin-bottom:14px">
+        <div class="stepper">
+          <div class="done">1 · Outreach sent</div><div class="done">2 · Collecting replies</div>
+          <div class="now">3 · Ready to analyze</div><div>4 · Ranked</div><div>5 · Decisions sent</div>
+        </div>
+      </div>
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="card kpi"><div class="v">7 / 10</div><div class="l">Vendors with complete info</div></div>
+        <div class="card kpi"><div class="v">1</div><div class="l">Waiting on follow-up (missing fields)</div></div>
+        <div class="card kpi"><div class="v">2</div><div class="l">No reply yet · reminder scheduled</div></div>
+        <div class="card kpi"><div class="v">12</div><div class="l">Products captured in database</div></div>
+      </div>
+      <div class="grid g-main">
+        <div class="card">
+          <h2>Reply progress</h2>
+          <div class="threshold" style="margin:14px 0 6px">
+            <div class="bar" style="height:14px"><i style="width:70%"></i></div>
+            <div class="mark" style="left:70%"></div>
+          </div>
+          <div class="row muted" style="font-size:12px"><span>0%</span><span class="spacer"></span><span>70% threshold ✓ reached</span><span class="spacer"></span><span>100%</span></div>
+          <div class="callout" style="margin-top:14px">✅ <b>Threshold reached.</b> You can start analysis now, or wait for Ningbo Polar (follow-up sent) and the 2 vendors who haven't replied. Late replies are added and re-ranked automatically.</div>
+          <h2 style="margin-top:18px">Needs your approval</h2>
+          <table>
+            <tr><td><span class="pill p-warn">Follow-up</span></td><td>Ask <b>Ningbo Polar</b> for lead time + FDA/LFGB certificates</td><td class="right"><button class="btn sm" onclick="go('responses');pickVendor('V7')">Review</button> <button class="btn sm primary">Approve &amp; send</button></td></tr>
+            <tr><td><span class="pill p-blue">Reminder</span></td><td>Nudge <b>Hanoi Thermo</b> and <b>Guangdong Lumi</b> (no reply after 18 days)</td><td class="right"><button class="btn sm">Review</button> <button class="btn sm primary">Approve &amp; send</button></td></tr>
+            <tr><td><span class="pill p-grey">Data check</span></td><td>Low-confidence field: <b>Saigon Drinkware</b> capacity "1.2L / 40oz?"</td><td class="right"><button class="btn sm" onclick="go('responses');pickVendor('V3')">Check</button></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h2>Agent activity</h2>
+          <ul class="feed">
+            <li><span class="t">10:42</span><span class="dot" style="background:var(--good)"></span><div>Extracted 2 products from <b>Taichung Craft</b>. All required fields present.</div></li>
+            <li><span class="t">10:41</span><span class="dot" style="background:var(--warn)"></span><div><b>Ningbo Polar</b> reply missing 2 required fields → follow-up drafted, waiting for approval.</div></li>
+            <li><span class="t">09:15</span><span class="dot" style="background:var(--good)"></span><div>Threshold reached (7/10). Analysis unlocked.</div></li>
+            <li><span class="t">Yest.</span><span class="dot" style="background:var(--blue)"></span><div>Trend scan refreshed: 14 signals for drinkware.</div></li>
+            <li><span class="t">Yest.</span><span class="dot" style="background:var(--good)"></span><div><b>Lisbon Cerâmica</b> answered follow-up (MOQ = 500). Marked complete.</div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OUTREACH ============ -->
+    <section class="view" id="outreach">
+      <header class="top"><div><h1>1 · Brief &amp; outreach</h1><div class="sub">Write the request once; the agent personalizes and sends it to each selected vendor.</div></div></header>
+      <div class="grid g2">
+        <div class="card">
+          <h2>Request brief</h2>
+          <label class="muted" style="font-size:12px">Theme</label>
+          <input type="text" value="Spring 2027 — 'Fresh Air': soft pastels, matte powder coat, outdoor &amp; on-the-go">
+          <div style="height:10px"></div>
+          <label class="muted" style="font-size:12px">Product categories</label>
+          <div class="chips" style="margin:4px 0 10px">
+            <span class="chip on">Insulated tumbler</span><span class="chip on">Water bottle</span><span class="chip on">Glass cup</span>
+            <span class="chip on">Ceramic mug</span><span class="chip">Kids bottle</span><span class="chip">Wine tumbler</span><span class="chip">+ add</span>
+          </div>
+          <label class="muted" style="font-size:12px">Requirements &amp; notes</label>
+          <textarea>• Capacity 16–40 oz; 18/8 (304) stainless for insulated items
+• Food-contact compliance: FDA + LFGB; BPA-free lids; Prop 65 compliant
+• Dishwasher-safe preferred
+• Target FOB: tumblers ≤ $4.50, glass ≤ $2.50, mugs ≤ $3.50
+• Launch 2027-04-01 → goods in DC by 2027-03-15</textarea>
+          <div style="height:10px"></div>
+          <div class="row"><div style="flex:1"><label class="muted" style="font-size:12px">Reply deadline</label><input type="text" value="2026-11-10"></div>
+          <div style="flex:1"><label class="muted" style="font-size:12px">Start analysis when</label><select><option>70% of vendors complete</option><option>All vendors complete</option><option>Deadline passes</option></select></div></div>
+          <div class="callout" style="margin-top:12px">Vendors are asked for every <b>required field</b> in <a onclick="go('schema')" style="color:var(--accent);cursor:pointer;text-decoration:underline">Data fields</a>, so replies are easier to extract.</div>
+        </div>
+        <div class="card">
+          <div class="row"><h2 style="margin:0">Recipients</h2><span class="spacer"></span><span class="muted">10 selected</span></div>
+          <table style="margin-top:8px">
+            <thead><tr><th></th><th>Vendor</th><th>Country</th><th>Categories</th><th>Past rating</th></tr></thead>
+            <tbody id="recipients"></tbody>
+          </table>
+          <h2 style="margin-top:16px">Preview (personalized)</h2>
+          <div class="email">To: lily@yongkang-steel.example
+Subject: RFQ — Spring 2027 drinkware (reply by Nov 10)
+
+Hi Lily,
+
+Thanks again for the 20oz tumblers last season — sell-through was strong.
+For Spring 2027 we're developing a "Fresh Air" collection ...
+
+Please reply with, for each product:
+ 1. Product name &amp; photos      7. FOB unit price &amp; currency
+ 2. Category &amp; capacity        8. MOQ (total and per colour)
+ 3. Material &amp; finish          9. Production lead time
+ 4. Size (H × D) &amp; weight     10. Sample time &amp; cost
+ 5. Lid type                  11. Certifications (FDA, LFGB...)
+ 6. Country of origin / port  12. Payment terms</div>
+          <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn">Save draft</button><button class="btn primary">Review &amp; send to 10 vendors</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RESPONSES ============ -->
+    <section class="view" id="responses">
+      <header class="top"><div><h1>2 · Vendor responses</h1><div class="sub">Each reply is read by the agent, checked against required fields, and either saved or followed up.</div></div></header>
+      <div class="grid" style="grid-template-columns:330px 1fr;align-items:start">
+        <div class="card" style="padding:0">
+          <table><thead><tr><th>Vendor</th><th>Status</th><th class="right">Fields</th></tr></thead><tbody id="vendorList"></tbody></table>
+        </div>
+        <div id="vendorDetail"></div>
+      </div>
+    </section>
+
+    <!-- ============ DATABASE ============ -->
+    <section class="view" id="database">
+      <header class="top">
+        <div><h1>3 · Product database</h1><div class="sub">One row per vendor × product. Edit any cell; the agent's original value and source email are kept.</div></div>
+        <div class="row"><select style="width:auto"><option>Group by vendor</option><option>Group by category</option></select><button class="btn">Export CSV</button></div>
+      </header>
+      <div class="card" style="padding:0"><div class="scroll"><table id="dbTable"></table></div></div>
+    </section>
+
+    <!-- ============ ANALYSIS ============ -->
+    <section class="view" id="analysis">
+      <header class="top">
+        <div><h1>4 · Analysis &amp; ranking</h1><div class="sub">Scores are 0–100 per dimension. Move the sliders to re-weight; the ranking updates live.</div></div>
+        <button class="btn">↻ Re-run analysis</button>
+      </header>
+      <div class="grid" style="grid-template-columns:290px 1fr;align-items:start">
+        <div class="grid">
+          <div class="card">
+            <h2>Scoring weights</h2>
+            <div id="weights"></div>
+            <div class="muted" style="font-size:12px;margin-top:6px">Presets: <a class="preset" data-p="balanced">Balanced</a> · <a class="preset" data-p="margin">Margin first</a> · <a class="preset" data-p="speed">Speed to market</a></div>
+          </div>
+          <div class="card">
+            <h2>Trend signals <span class="muted" style="font-weight:400;font-size:12px">· refreshed yesterday</span></h2>
+            <div class="trend"><span>Handle tumblers 30–40 oz</span><span class="up">▲ high</span></div>
+            <div class="trend"><span>Matte pastel powder coat</span><span class="up">▲ rising</span></div>
+            <div class="trend"><span>Glass cups + bamboo lid &amp; straw</span><span class="up">▲ rising</span></div>
+            <div class="trend"><span>Leak-proof flip-straw lids</span><span class="up">▲ rising</span></div>
+            <div class="trend"><span>Ceramic-lined stainless</span><span class="up">▲ emerging</span></div>
+            <div class="trend"><span>Classic glossy ceramic mugs</span><span class="down">▼ cooling</span></div>
+            <div class="muted" style="font-size:11px;margin-top:8px">Sources would include marketplace bestseller lists, search interest and social mentions (sample data here).</div>
+          </div>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="row" style="padding:12px 14px"><h2 style="margin:0">Ranked products</h2><span class="spacer"></span>
+            <select id="catFilter" style="width:auto"><option value="">All categories</option><option>Tumbler</option><option>Water bottle</option><option>Glass cup</option><option>Mug</option><option>Kids bottle</option></select></div>
+          <div class="scroll"><table id="rankTable"></table></div>
+          <div id="why" style="padding:14px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DECISIONS ============ -->
+    <section class="view" id="decisions">
+      <header class="top"><div><h1>5 · Decisions</h1><div class="sub">Agent suggestions are pre-filled. Change any decision, then approve the outgoing emails.</div></div>
+        <button class="btn primary">Approve &amp; send decision emails</button></header>
+      <div class="grid g3" style="margin-bottom:14px">
+        <div class="card kpi"><div class="v" style="color:var(--good)" id="kAccept">–</div><div class="l">Accept as is</div></div>
+        <div class="card kpi"><div class="v" style="color:var(--warn)" id="kModify">–</div><div class="l">Request changes</div></div>
+        <div class="card kpi"><div class="v" style="color:var(--bad)" id="kReject">–</div><div class="l">Decline</div></div>
+      </div>
+      <div class="grid g-main" style="align-items:start">
+        <div class="card" style="padding:0"><table id="decTable"></table></div>
+        <div class="card">
+          <h2>Outgoing email preview</h2>
+          <div class="email" id="decEmail">Select a product to preview its email.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCHEMA ============ -->
+    <section class="view" id="schema">
+      <header class="top"><div><h1>Data fields</h1><div class="sub">The fields the agent extracts for every vendor × product. Required fields trigger a follow-up email when missing.</div></div>
+        <button class="btn">+ Add field</button></header>
+      <div class="card" style="padding:0"><table id="schemaTable"></table></div>
+    </section>
+
+    <!-- ============ VENDORS ============ -->
+    <section class="view" id="vendors">
+      <header class="top"><div><h1>Vendor directory</h1><div class="sub">Contacts and history used for outreach and the "vendor reliability" score.</div></div>
+        <button class="btn">+ Add vendor</button></header>
+      <div class="card" style="padding:0"><table id="vendorDir"></table></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ---------------- Sample data (fictional) ---------------- */
+const SCHEMA = [
+  ["product_name","Product name","text",true,"Vendor's item name / code"],
+  ["category","Category","enum",true,"Tumbler · Water bottle · Glass cup · Mug · Kids bottle"],
+  ["description","Product description","text",true,"Short description incl. design features"],
+  ["capacity_oz","Capacity","number (oz)",true,"Converted from ml if needed"],
+  ["material","Material","text",true,"e.g. 18/8 stainless, borosilicate glass, stoneware, Tritan"],
+  ["insulation","Insulation","enum",false,"Double-wall vacuum · Single wall · None"],
+  ["lid_type","Lid type","text",true,"Straw, flip, slide, screw..."],
+  ["size_mm","Size (H × D)","text",true,"Millimetres"],
+  ["weight_g","Weight","number (g)",false,""],
+  ["colors","Colors / finish","list",true,""],
+  ["fob_price","FOB unit price","money",true,"Original currency kept; USD computed"],
+  ["moq","MOQ","number",true,"Total; per-colour MOQs multiplied out"],
+  ["lead_time_days","Production lead time","number (days)",true,"After sample approval"],
+  ["sample","Sample time & cost","text",false,""],
+  ["origin","Country of origin / port","text",true,""],
+  ["certifications","Certifications","list",true,"FDA, LFGB, Prop 65, BPA-free"],
+  ["dishwasher_safe","Dishwasher safe","bool",false,""],
+  ["payment_terms","Payment terms","text",false,""],
+];
+const VENDORS = {
+  V1:{name:"Yongkang Steelware",country:"CN",contact:"lily@yongkang-steel.example",cats:"Tumbler, Bottle",rating:4.6,status:"complete",fields:"16/16",history:"6 POs, 98% on time"},
+  V2:{name:"Zhejiang Everbright",country:"CN",contact:"sales@everbright.example",cats:"Bottle",rating:4.1,status:"complete",fields:"16/16",history:"3 POs, 90% on time"},
+  V3:{name:"Saigon Drinkware",country:"VN",contact:"minh@saigondw.example",cats:"Tumbler",rating:4.4,status:"check",fields:"16/16",history:"2 POs, 100% on time"},
+  V4:{name:"Bharat Glassworks",country:"IN",contact:"anil@bharatglass.example",cats:"Glass",rating:3.9,status:"complete",fields:"16/16",history:"1 PO, 1 late"},
+  V5:{name:"Lisbon Cerâmica",country:"PT",contact:"ines@lisbonceramica.example",cats:"Mug",rating:4.7,status:"complete",fields:"16/16",history:"4 POs, 100% on time"},
+  V6:{name:"Shenzhen Hydra",country:"CN",contact:"amy@szhydra.example",cats:"Kids bottle",rating:3.6,status:"complete",fields:"16/16",history:"New vendor"},
+  V7:{name:"Ningbo Polar",country:"CN",contact:"kevin@ningbopolar.example",cats:"Tumbler",rating:3.8,status:"followup",fields:"14/16",history:"2 POs, 1 quality claim"},
+  V8:{name:"Taichung Craft",country:"TW",contact:"jay@tccraft.example",cats:"Glass",rating:4.5,status:"complete",fields:"16/16",history:"3 POs, 100% on time"},
+  V9:{name:"Hanoi Thermo",country:"VN",contact:"lan@hanoithermo.example",cats:"Tumbler, Bottle",rating:4.2,status:"waiting",fields:"–",history:"1 PO"},
+  V10:{name:"Guangdong Lumi",country:"CN",contact:"leo@gdlumi.example",cats:"Glass, Mug",rating:3.7,status:"waiting",fields:"–",history:"New vendor"},
+};
+// scores: cost, moq, lead, trend, spec, vendor (0-100)
+const PRODUCTS = [
+  {id:"P1",v:"V1",name:"YK-40H Handle Tumbler",cat:"Tumbler",cap:40,mat:"18/8 stainless, double-wall",lid:"Flip straw",fob:3.85,cur:"USD",moq:3000,lead:45,orig:"CN",cert:"FDA, LFGB",colors:"Sage, Lilac, Sand",s:[72,48,85,95,95,92],
+   change:"Reduce MOQ to 2,000 (split 3 colours) or price to $3.45 to offset tariff"},
+  {id:"P2",v:"V1",name:"YK-20 Slim Tumbler",cat:"Tumbler",cap:20,mat:"18/8 stainless, double-wall",lid:"Slide",fob:2.60,cur:"USD",moq:2000,lead:40,orig:"CN",cert:"FDA, LFGB",colors:"Matte pastel ×4",s:[85,70,88,62,95,92]},
+  {id:"P3",v:"V2",name:"EB-32 Sport Bottle",cat:"Water bottle",cap:32,mat:"18/8 stainless",lid:"Chug + loop",fob:3.40,cur:"USD",moq:2000,lead:50,orig:"CN",cert:"FDA",colors:"5 colours",s:[70,68,75,58,72,80],
+   change:"Provide LFGB test report; switch to matte powder coat"},
+  {id:"P4",v:"V3",name:"SD-40 Trek Tumbler",cat:"Tumbler",cap:40,mat:"18/8 stainless, ceramic-lined",lid:"Flip straw",fob:4.30,cur:"USD",moq:1000,lead:40,orig:"VN",cert:"FDA, LFGB, Prop 65",colors:"Sea glass, Oat",s:[78,92,88,97,98,90]},
+  {id:"P5",v:"V4",name:"BG-16 Glass Cup + Bamboo Lid",cat:"Glass cup",cap:16,mat:"Borosilicate glass, bamboo",lid:"Bamboo + glass straw",fob:1.90,cur:"USD",moq:1500,lead:60,orig:"IN",cert:"FDA",colors:"Clear, Frosted",s:[88,74,52,90,70,66],
+   change:"Shorten lead time to ≤45 days; add LFGB; drop-test packaging"},
+  {id:"P6",v:"V5",name:"LC-12 Stoneware Mug",cat:"Mug",cap:12,mat:"Stoneware, reactive glaze",lid:"None",fob:2.95,cur:"EUR",moq:500,lead:30,orig:"PT",cert:"FDA, LFGB, Prop 65",colors:"Oat, Sky",s:[60,98,95,45,96,96]},
+  {id:"P7",v:"V5",name:"LC-14 Matte Travel Mug",cat:"Mug",cap:14,mat:"Stoneware, matte glaze",lid:"Silicone",fob:3.60,cur:"EUR",moq:500,lead:35,orig:"PT",cert:"FDA, LFGB",colors:"Pastel ×3",s:[52,98,92,70,90,96],
+   change:"Target price €3.20; confirm silicone lid is food-grade"},
+  {id:"P8",v:"V6",name:"HY-24 Kids Tritan Bottle",cat:"Kids bottle",cap:24,mat:"Tritan, silicone straw",lid:"Push-button straw",fob:1.75,cur:"USD",moq:5000,lead:35,orig:"CN",cert:"BPA-free only",colors:"Print ×6",s:[92,20,90,55,40,55]},
+  {id:"P9",v:"V7",name:"NP-30 Polar Tumbler",cat:"Tumbler",cap:30,mat:"18/8 stainless",lid:"Slide",fob:2.95,cur:"USD",moq:2000,lead:null,orig:"CN",cert:"(missing)",colors:"Pantone match",s:[82,66,null,72,null,58],pending:true},
+  {id:"P10",v:"V8",name:"TC-16 Ribbed Glass + Straw",cat:"Glass cup",cap:16,mat:"Soda-lime glass",lid:"Bamboo",fob:2.20,cur:"USD",moq:1000,lead:40,orig:"TW",cert:"FDA, LFGB",colors:"Clear, Amber, Sage",s:[82,90,88,88,92,90]},
+  {id:"P11",v:"V8",name:"TC-20 Can Glass",cat:"Glass cup",cap:20,mat:"Soda-lime glass",lid:"None",fob:1.80,cur:"USD",moq:1000,lead:40,orig:"TW",cert:"FDA",colors:"Clear",s:[88,90,88,60,80,90]},
+  {id:"P12",v:"V2",name:"EB-24 Kids Bottle",cat:"Kids bottle",cap:24,mat:"18/8 stainless",lid:"Straw",fob:2.90,cur:"USD",moq:2000,lead:50,orig:"CN",cert:"FDA",colors:"4 colours",s:[64,62,75,50,70,80]},
+];
+const DIMS = ["Cost & margin","MOQ fit","Lead time","Trend fit","Spec compliance","Vendor reliability"];
+const PRESETS = {balanced:[25,15,15,20,15,10], margin:[40,20,10,10,10,10], speed:[15,10,35,20,10,10]};
+let W = [...PRESETS.balanced];
+
+/* ---------------- Navigation ---------------- */
+function go(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===id));
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
+
+/* ---------------- Helpers ---------------- */
+const statusPill = s => ({complete:'<span class="pill p-good">Complete</span>',followup:'<span class="pill p-warn">Follow-up sent</span>',
+  waiting:'<span class="pill p-grey">No reply</span>',check:'<span class="pill p-blue">Needs check</span>'}[s]);
+const fx = {USD:1,EUR:1.08};
+const usd = p => p.fob*fx[p.cur];
+
+/* ---------------- Outreach recipients ---------------- */
+document.getElementById('recipients').innerHTML = Object.values(VENDORS).map(v=>
+  `<tr><td><input type="checkbox" checked></td><td>${v.name}</td><td>${v.country}</td><td class="muted">${v.cats}</td><td>★ ${v.rating}</td></tr>`).join('');
+
+/* ---------------- Responses ---------------- */
+const EMAILS = {
+  V7:`From: Kevin Wang <kevin@ningbopolar.example>
+Subject: RE: RFQ — Spring 2027 drinkware
+
+hi,
+pls find our offer:
+NP-30 tumbler 30oz 304 steel, slide lid,
+900ml, 26.5*9.8cm, 410g
+price USD 2.95 FOB Ningbo, moq 2000pcs mix color
+color can match pantone. dishwasher ok.
+payment 30/70 TT
+sample 7 days free
+
+thanks
+Kevin`,
+  V3:`From: Minh Tran <minh@saigondw.example>
+Subject: Quotation SD-40 Trek
+
+Dear team,
+SD-40 Trek tumbler, 1.2L / 40oz? ceramic-lined 18/8
+stainless, double wall vacuum, flip straw lid.
+Size 27 x 10 cm, 520 g. Sea glass &amp; Oat matte.
+FOB HCMC USD 4.30, MOQ 1,000 pcs, 40 days.
+FDA, LFGB, Prop 65 reports attached.
+Sample 10 days, $30. Payment 30/70.
+Best, Minh`
+};
+function pickVendor(id){
+  document.querySelectorAll('#vendorList tr').forEach(r=>r.classList.toggle('sel',r.dataset.id===id));
+  const v = VENDORS[id];
+  const el = document.getElementById('vendorDetail');
+  if(v.status==='waiting'){
+    el.innerHTML = `<div class="card"><h2>${v.name}</h2><p class="muted">No reply since outreach on 2026-10-20 (18 days).</p>
+      <div class="callout warn">The agent drafted a reminder. It will be sent after your approval, or automatically 3 days before the deadline if auto-reminders are on.</div>
+      <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn">Edit reminder</button><button class="btn primary">Approve &amp; send</button></div></div>`;
+    return;
+  }
+  const email = EMAILS[id] || `From: ${v.contact}\nSubject: RE: RFQ — Spring 2027 drinkware\n\n(Vendor reply shown here; attachments listed below.)\n\n📎 catalogue.pdf   📎 test-reports.zip`;
+  const prods = PRODUCTS.filter(p=>p.v===id);
+  const p = prods[0];
+  const missing = id==='V7' ? ['lead_time_days','certifications'] : [];
+  const lowconf = id==='V3' ? ['capacity_oz'] : [];
+  const val = k => ({product_name:p.name,category:p.cat,description:`${p.cap}oz ${p.mat}`,capacity_oz:id==='V3'?'40 oz (email says "1.2L / 40oz?")':p.cap+' oz',
+    material:p.mat,insulation:p.mat.includes('double')||p.mat.includes('ceramic-lined')?'Double-wall vacuum':'—',lid_type:p.lid,size_mm:id==='V7'?'265 × 98':'—',weight_g:id==='V7'?'410':'—',colors:p.colors,
+    fob_price:`${p.cur} ${p.fob.toFixed(2)}`,moq:p.moq.toLocaleString(),lead_time_days:p.lead??'',sample:'7–10 days',origin:p.orig,certifications:missing.includes('certifications')?'':p.cert,
+    dishwasher_safe:'Yes',payment_terms:'30/70 T/T'})[k];
+  const fields = SCHEMA.map(([k,label,,req])=>{
+    const miss = missing.includes(k), low = lowconf.includes(k);
+    return `<div class="field ${miss?'missing':''}"><span class="k">${label}${req?' *':''}</span>
+      <span class="v">${miss?'Missing':val(k)}</span>
+      <span class="conf">${miss?'<span class="pill p-bad">missing</span>':low?'<span class="pill p-blue">62%</span>':'<span class="muted">98%</span>'}</span></div>`}).join('');
+  const followup = missing.length ? `<div class="card" style="margin-top:14px;border-color:#f3d3a6">
+      <div class="row"><h2 style="margin:0">Follow-up email (drafted by agent)</h2><span class="spacer"></span><span class="pill p-warn">Waiting for approval</span></div>
+      <div class="email" style="margin-top:10px">To: ${v.contact}
+Subject: RE: RFQ — Spring 2027 drinkware — 2 details needed
+
+Hi Kevin,
+
+Thanks for the NP-30 offer. To include it in our review, could you send:
+ 1. Production lead time (days after sample approval)
+ 2. Food-contact test reports: FDA and LFGB (Prop 65 if available)
+
+We're finalizing the shortlist on Nov 10. Thank you!</div>
+      <div class="row" style="margin-top:10px"><span class="spacer"></span><button class="btn">Edit</button><button class="btn primary">Approve &amp; send</button></div></div>` : '';
+  el.innerHTML = `<div class="grid g2" style="align-items:start">
+      <div class="card"><div class="row"><h2 style="margin:0">${v.name}</h2><span class="spacer"></span>${statusPill(v.status)}</div>
+        <div class="muted" style="font-size:12px;margin:4px 0 10px">Received 2026-11-06 · ${prods.length} product${prods.length>1?'s':''} found</div>
+        <div class="email">${email}</div></div>
+      <div class="card"><div class="row"><h2 style="margin:0">Extracted: ${p.name}</h2><span class="spacer"></span>
+        ${prods.length>1?`<select style="width:auto">${prods.map(x=>`<option>${x.name}</option>`).join('')}</select>`:''}</div>
+        <div class="muted" style="font-size:12px;margin:4px 0 6px">* required · confidence on the right · click a value to edit</div>
+        ${fields}
+        <div class="row" style="margin-top:12px"><span class="spacer"></span>
+        <button class="btn">Edit fields</button><button class="btn primary" ${missing.length?'disabled':''}>Confirm &amp; save to database</button></div></div>
+    </div>${followup}`;
+}
+document.getElementById('vendorList').innerHTML = Object.entries(VENDORS).map(([id,v])=>
+  `<tr class="click" data-id="${id}" onclick="pickVendor('${id}')"><td><b>${v.name}</b><div class="muted" style="font-size:12px">${v.country} · ${PRODUCTS.filter(p=>p.v===id).length||'–'} products</div></td><td>${statusPill(v.status)}</td><td class="right num">${v.fields}</td></tr>`).join('');
+pickVendor('V7');
+
+/* ---------------- Database ---------------- */
+(function(){
+  let html = `<thead><tr><th>Vendor</th><th>Product</th><th>Category</th><th class="right">Cap. (oz)</th><th>Material</th><th>Lid</th><th>Colors</th><th class="right">FOB</th><th class="right">FOB (USD)</th><th class="right">MOQ</th><th class="right">Lead (d)</th><th>Origin</th><th>Certifications</th><th>Status</th></tr></thead><tbody>`;
+  Object.entries(VENDORS).forEach(([id,v])=>{
+    const ps = PRODUCTS.filter(p=>p.v===id); if(!ps.length) return;
+    ps.forEach((p,i)=>{
+      html += `<tr><td>${i===0?`<b>${v.name}</b>`:''}</td><td>${p.name}</td><td>${p.cat}</td><td class="right num">${p.cap}</td><td>${p.mat}</td><td>${p.lid}</td><td class="muted">${p.colors}</td>
+      <td class="right num">${p.cur} ${p.fob.toFixed(2)}</td><td class="right num">$${usd(p).toFixed(2)}</td><td class="right num">${p.moq.toLocaleString()}</td>
+      <td class="right num">${p.lead??'<span class="pill p-bad">?</span>'}</td><td>${p.orig}</td><td>${p.cert.includes('missing')?'<span class="pill p-bad">missing</span>':p.cert}</td>
+      <td>${p.pending?'<span class="pill p-warn">Incomplete</span>':'<span class="pill p-good">Saved</span>'}</td></tr>`;
+    });
+  });
+  document.getElementById('dbTable').innerHTML = html+'</tbody>';
+})();
+
+/* ---------------- Analysis ---------------- */
+function overall(p){ if(p.pending) return null; const t=W.reduce((a,b)=>a+b,0)||1; return Math.round(p.s.reduce((a,x,i)=>a+x*W[i],0)/t); }
+function suggest(p){ const o=overall(p); if(o===null) return 'pending'; if(p.s[4]<50||o<60) return 'reject'; if(p.change||o<75) return 'modify'; return 'accept'; }
+const decPill = d => ({accept:'<span class="pill p-good">Accept</span>',modify:'<span class="pill p-warn">Request changes</span>',reject:'<span class="pill p-bad">Decline</span>',pending:'<span class="pill p-grey">Waiting for info</span>'}[d]);
+function renderWeights(){
+  document.getElementById('weights').innerHTML = DIMS.map((d,i)=>
+    `<div class="slider"><span>${d}</span><input type="range" min="0" max="50" value="${W[i]}" data-i="${i}"><span class="num right">${W[i]}</span></div>`).join('');
+  document.querySelectorAll('#weights input').forEach(r=>r.oninput=e=>{W[+e.target.dataset.i]=+e.target.value;renderWeights();renderRank();renderDecisions();});
+}
+document.querySelectorAll('.preset').forEach(a=>{a.style.cssText='color:var(--accent);cursor:pointer';a.onclick=()=>{W=[...PRESETS[a.dataset.p]];renderWeights();renderRank();renderDecisions();}});
+function renderRank(){
+  const cat = document.getElementById('catFilter').value;
+  const rows = PRODUCTS.filter(p=>!cat||p.cat===cat).sort((a,b)=>(overall(b)??-1)-(overall(a)??-1));
+  const mb = x => x==null?'<span class="muted">–</span>':`<span class="minibar"><i style="width:${x}%"></i></span><span class="num">${x}</span>`;
+  document.getElementById('rankTable').innerHTML = `<thead><tr><th>#</th><th>Product</th><th>Vendor</th><th class="right">Landed $</th>${DIMS.map(d=>`<th>${d}</th>`).join('')}<th class="right">Overall</th><th>Suggested</th></tr></thead><tbody>`+
+    rows.map((p,i)=>`<tr class="click" onclick="explain('${p.id}')"><td>${p.pending?'–':i+1}</td><td><b>${p.name}</b><div class="muted" style="font-size:12px">${p.cat} · ${p.cap} oz</div></td><td>${VENDORS[p.v].name}</td>
+      <td class="right num">$${(usd(p)*(p.orig==='CN'?1.31:1.06)+0.6).toFixed(2)}</td>${p.s.map(x=>`<td>${mb(x)}</td>`).join('')}
+      <td class="right score">${overall(p)??'–'}</td><td>${decPill(suggest(p))}</td></tr>`).join('')+'</tbody>';
+}
+document.getElementById('catFilter').onchange=renderRank;
+function explain(id){
+  const p = PRODUCTS.find(x=>x.id===id), v = VENDORS[p.v];
+  const notes = {
+    P1:"Top trend fit (handle tumbler, pastel matte) but MOQ 3,000 vs forecast 1,800 creates ~$6.4k excess-inventory risk, and the +25% China tariff lifts landed cost to $5.64. <b>Ask for MOQ 2,000 or $3.45 FOB.</b>",
+    P4:"Highest overall: ceramic-lined is an emerging trend, MOQ 1,000 fits forecast, full compliance, no China tariff. Costs $0.45 more FOB than YK-40H but is <b>$0.60 cheaper landed</b>.",
+    P8:"Cheapest FOB in the round, but MOQ 5,000 is ~4× forecast and only 'BPA-free' is claimed — no FDA/LFGB reports for a kids product. Suggest decline.",
+    P9:"Can't score yet: lead time and certifications missing. Follow-up is waiting for your approval.",
+  };
+  document.getElementById('why').innerHTML = `<div class="callout"><b>Why ${p.name} (${v.name}) scores ${overall(p)??'–'}:</b> ${notes[id]||`Strongest on ${DIMS[p.s.indexOf(Math.max(...p.s.filter(x=>x!=null)))].toLowerCase()}; weakest on ${DIMS[p.s.indexOf(Math.min(...p.s.filter(x=>x!=null)))].toLowerCase()}.`}</div>`;
+}
+renderWeights(); renderRank(); explain('P4');
+
+/* ---------------- Decisions ---------------- */
+function renderDecisions(){
+  const rows = PRODUCTS.map(p=>({p,d:suggest(p)}));
+  ['accept','modify','reject'].forEach((k,i)=>document.getElementById(['kAccept','kModify','kReject'][i]).textContent=rows.filter(r=>r.d===k).length);
+  document.getElementById('decTable').innerHTML = `<thead><tr><th>Product</th><th>Vendor</th><th class="right">Score</th><th>Decision</th><th>Change request / reason</th></tr></thead><tbody>`+
+    rows.sort((a,b)=>(overall(b.p)??-1)-(overall(a.p)??-1)).map(({p,d})=>`<tr class="click" onclick="decEmail('${p.id}','${d}')"><td><b>${p.name}</b></td><td>${VENDORS[p.v].name}</td><td class="right score">${overall(p)??'–'}</td>
+      <td><select style="width:auto;padding:3px 6px">${['accept','modify','reject','pending'].map(o=>`<option ${o===d?'selected':''}>${{accept:'Accept',modify:'Request changes',reject:'Decline',pending:'Waiting for info'}[o]}</option>`).join('')}</select></td>
+      <td class="muted">${d==='modify'?(p.change||'Improve price / lead time'):d==='reject'?'Below threshold on spec or overall score':d==='pending'?'Missing required fields':'Proceed to sampling'}</td></tr>`).join('')+'</tbody>';
+}
+function decEmail(id,d){
+  const p = PRODUCTS.find(x=>x.id===id), v = VENDORS[p.v];
+  const body = {
+    accept:`Great news — we'd like to move ${p.name} to sampling.\nPlease send 3 pre-production samples in ${p.colors} to our NYC office.\nTarget PO: ${p.moq.toLocaleString()} pcs at ${p.cur} ${p.fob.toFixed(2)} FOB.`,
+    modify:`We like ${p.name} and would like to continue if we can adjust:\n • ${p.change||'Price and lead time'}\nCould you confirm by Nov 20? We can move to sampling right after.`,
+    reject:`Thank you for the ${p.name} offer. We won't move forward this season,\nmainly due to MOQ and compliance documentation. We'd love to see\nyour Fall 2027 line.`,
+    pending:`(No decision yet — waiting for the vendor's follow-up reply.)`}[d];
+  document.getElementById('decEmail').textContent = `To: ${v.contact}\nSubject: Spring 2027 — ${p.name}\n\nHi,\n\n${body}\n\nBest,\nSip & Co. Product Development`;
+}
+renderDecisions(); decEmail('P1','modify');
+
+/* ---------------- Schema & vendor directory ---------------- */
+document.getElementById('schemaTable').innerHTML = `<thead><tr><th>Field</th><th>Key</th><th>Type</th><th>Required</th><th>Notes / normalization</th></tr></thead><tbody>`+
+  SCHEMA.map(([k,l,t,r,n])=>`<tr><td><b>${l}</b></td><td><code>${k}</code></td><td>${t}</td><td>${r?'<span class="pill p-good">Required</span>':'<span class="pill p-grey">Optional</span>'}</td><td class="muted">${n}</td></tr>`).join('')+'</tbody>';
+document.getElementById('vendorDir').innerHTML = `<thead><tr><th>Vendor</th><th>Country</th><th>Contact</th><th>Categories</th><th>History</th><th>Rating</th><th>This round</th></tr></thead><tbody>`+
+  Object.values(VENDORS).map(v=>`<tr><td><b>${v.name}</b></td><td>${v.country}</td><td class="muted">${v.contact}</td><td>${v.cats}</td><td>${v.history}</td><td>★ ${v.rating}</td><td>${statusPill(v.status)}</td></tr>`).join('')+'</tbody>';
+</script>
+</body>
+</html>
