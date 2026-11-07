@@ -1,0 +1,139 @@
+{
+  "title": "Spring 2027 · Insulated & Glass drinkware",
+  "brief": "# Spring 2027 'Fresh Air' drinkware collection\n\nSoft pastels, matte powder coat, outdoor & on-the-go.\n\n- Food-contact compliance: FDA + LFGB test reports required (hard requirement); BPA-free lids\n- 18/8 (304) stainless steel for insulated items (hard requirement)\n- Dishwasher-safe lids preferred\n- Goods in our DC by 2027-03-15 for a 2027-04-01 launch\n\nPlease reply, for each product you propose, with: design & photos, material, capacity, lid type, FOB unit price & currency, MOQ (total and per colour), production lead time, sample time & cost, payment terms, port of loading, and certifications (FDA, LFGB, Prop 65).",
+  "brief_items": [
+    {
+      "sku": "A",
+      "name": "Insulated tumbler 30-40 oz",
+      "requirements": "30-40 oz, 18/8 (304) stainless double-wall vacuum (hard requirement); straw or flip lid, leak-resistant; matte pastel colours; FDA + LFGB (hard requirement). Retail $34."
+    },
+    {
+      "sku": "B",
+      "name": "Glass cup 16 oz with lid & straw",
+      "requirements": "14-20 oz glass cup with lid and straw; FDA + LFGB (hard requirement); clear or tinted. Retail $18."
+    }
+  ],
+  "vendors": [
+    {
+      "name": "Yongkang Steelware",
+      "email": "lily@yongkang-steelware.sim",
+      "country": "CN"
+    },
+    {
+      "name": "Saigon Drinkware",
+      "email": "minh@saigon-drinkware.sim",
+      "country": "VN"
+    },
+    {
+      "name": "Ningbo Polar",
+      "email": "kevin@ningbo-polar.sim",
+      "country": "CN"
+    },
+    {
+      "name": "Taichung Craft",
+      "email": "jay@taichung-craft.sim",
+      "country": "TW"
+    },
+    {
+      "name": "Guangdong Lumi",
+      "email": "leo@guangdong-lumi.sim",
+      "country": "CN"
+    },
+    {
+      "name": "Shenzhen Hydra",
+      "email": "amy@shenzhen-hydra.sim",
+      "country": "CN"
+    }
+  ],
+  "required_fields": [
+    "design",
+    "materials",
+    "capacity",
+    "lid_type",
+    "unit_price",
+    "currency",
+    "incoterm",
+    "moq",
+    "production_days",
+    "sampling_days",
+    "sampling_cost",
+    "payment_terms",
+    "port_of_loading",
+    "certifications"
+  ],
+  "costing": {
+    "forecast": {
+      "A": {
+        "season_units": 1800,
+        "season_weeks": 20,
+        "retail_price": 34.0
+      },
+      "B": {
+        "season_units": 1200,
+        "season_weeks": 20,
+        "retail_price": 18.0
+      }
+    },
+    "assumptions": {
+      "_note": "Illustrative planning assumptions for the hackathon demo. Duty/tariff rates are NOT verified.",
+      "today": "2026-11-07",
+      "po_date": "2026-12-01",
+      "in_store_date": "2027-03-15",
+      "receiving_buffer_days": 7,
+      "target_imu": 0.65,
+      "fx_to_usd": {
+        "USD": 1.0,
+        "CNY": 0.14,
+        "EUR": 1.08,
+        "TWD": 0.031
+      },
+      "freight_per_unit_usd": {
+        "A": {
+          "CN": 0.55,
+          "VN": 0.6,
+          "TW": 0.58
+        },
+        "B": {
+          "CN": 0.35,
+          "VN": 0.38,
+          "TW": 0.36
+        }
+      },
+      "transit_days": {
+        "CN": 30,
+        "VN": 32,
+        "TW": 28
+      },
+      "duty_rate": {
+        "A": {
+          "CN": 0.034,
+          "VN": 0.034,
+          "TW": 0.034
+        },
+        "B": {
+          "CN": 0.05,
+          "VN": 0.05,
+          "TW": 0.05
+        }
+      },
+      "extra_tariff_rate": {
+        "CN": 0.25,
+        "VN": 0.0,
+        "TW": 0.0
+      },
+      "extra_dev_days": {
+        "accept": 0,
+        "modify": 21,
+        "co_develop": 45
+      },
+      "extra_dev_cost_usd": {
+        "accept": 0,
+        "modify": 400,
+        "co_develop": 1500
+      },
+      "excess_salvage_rate": 0.3
+    }
+  },
+  "deadline_hours": 1,
+  "created_by": "demo"
+}

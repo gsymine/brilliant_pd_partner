@@ -74,6 +74,10 @@ class Settings:
     default_run_deadline_hours: float
     tick_seconds: int
 
+    # Vendor simulator (demo): vendors with *.sim addresses are answered by app/vendor_sim.py
+    sim_mode: str                      # "llm" (ZooWork writes the wording) | "scripted" (templates) | "off"
+    sim_speed: float                   # multiplier on each simulated vendor's reply delay
+
 
 def load_settings() -> Settings:
     _load_dotenv(BACKEND_DIR / ".env")
@@ -105,4 +109,6 @@ def load_settings() -> Settings:
         max_outbound_per_vendor=_int("PD_MAX_OUTBOUND_PER_VENDOR", 8),
         default_run_deadline_hours=_float("PD_RUN_DEADLINE_HOURS", 168.0),
         tick_seconds=_int("PD_TICK_SECONDS", 300),
+        sim_mode=os.environ.get("SIM_MODE", "llm").strip().lower(),
+        sim_speed=_float("SIM_SPEED", 1.0),
     )

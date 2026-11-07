@@ -8,6 +8,7 @@ deadlines, and exposes the endpoints the frontend team will call.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -17,11 +18,12 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 from zoowork import create_zoowork_client
 
-from .config import load_settings
+from .config import BACKEND_DIR, load_settings
 from .db import Database
 from .email_service import EmailService, ParsedEmail
 from .orchestrator import Orchestrator
 from .tools import vendor_memory
+from .vendor_sim import VendorSimulator
 from .zoowork_runtime import ZooworkRuntime
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
@@ -77,6 +79,10 @@ settings = load_settings()
 db = Database(settings.db_path)
 email_service = EmailService(settings, db)
 orchestrator = Orchestrator(db, settings, email_service)
+simulator = VendorSimulator(settings, db) if settings.sim_mode != "off" else None
+if simulator:
+    email_service.listeners.append(simulator.on_outbound)
+DEMO_RUN_PATH = BACKEND_DIR / "examples" / "drinkware_demo_run.json"
 
 
 async def _poll_inbox() -> None:
@@ -106,6 +112,14 @@ async def lifespan(_: FastAPI):
         agents = await runtime.ensure_agents()
         log.info("ZooWork agents ready: %s", agents)
         await runtime.recover_pending_tool_calls()
+        if simulator:
+            simulator.attach(asyncio.get_running_loop(), orchestrator.handle_inbound,
+                             client if settings.sim_mode == "llm" else None)
+            if settings.sim_mode == "llm":
+                try:
+                    log.info("Vendor simulator agent ready: %s", await simulator.ensure_agent())
+                except Exception:
+                    log.exception("Vendor simulator agent unavailable; simulated vendors will use templates")
         background = [asyncio.create_task(_poll_inbox()), asyncio.create_task(_ticker())]
         try:
             yield
@@ -133,7 +147,34 @@ def _thread_summary(t: dict[str, Any]) -> dict[str, Any]:
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {"ok": True, "agents": orchestrator.runtime.agent_ids if orchestrator.runtime else {},
-            "email_mode": settings.email_mode, "imap": bool(settings.imap_enabled and settings.imap_host)}
+            "email_mode": settings.email_mode, "imap": bool(settings.imap_enabled and settings.imap_host),
+            "vendor_simulator": {"mode": settings.sim_mode, "agent": simulator.agent_id if simulator else None}}
+
+
+# ---------------------------------------------------------------- demo: vendor simulator
+@app.get("/sim/vendors")
+def sim_vendors() -> list[dict[str, Any]]:
+    """The fictional vendors the simulator plays (emails ending in .sim)."""
+    if not simulator:
+        return []
+    return [{k: v.get(k) for k in ("key", "name", "email", "contact", "country", "style", "demo_role")}
+            for v in simulator.vendors.values()]
+
+
+class DemoStartRequest(BaseModel):
+    extra_vendors: list[Vendor] = Field([], description="Real vendors to add (e.g. a teammate's phone) next to the simulated ones")
+    title: str | None = None
+
+
+@app.post("/demo/start", status_code=201)
+async def demo_start(req: DemoStartRequest | None = None) -> dict[str, Any]:
+    """Start the drinkware demo run with the simulated vendors (plus optional real ones)."""
+    body = json.loads(DEMO_RUN_PATH.read_text(encoding="utf-8"))
+    if req:
+        body["vendors"] += [v.model_dump() for v in req.extra_vendors]
+        if req.title:
+            body["title"] = req.title
+    return await start_sourcing_process(StartRunRequest(**body))
 
 
 @app.post("/runs", status_code=201)

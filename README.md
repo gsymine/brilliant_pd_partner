@@ -1,75 +1,68 @@
 # Brilliant PD Partner
 
-An AI sourcing & product development agent for home decor brands, built on
+An AI assistant for **drinkware product development managers / assistants**, built on
 [ZooWork Managed Agents](https://zoowork.ai/docs/) for the Fashion & Finance Hackathon (Nov 2026, NYC).
 
-**The pitch:** buyers compare vendor quotes on FOB price. That's the wrong number.
-Brilliant PD Partner reads messy vendor emails, turns them into structured quotes, and ranks vendors
-on **risk-adjusted cost per unit sold**: landed cost (FX, freight, duty, tariffs) **plus** the
-excess-inventory cost of MOQs above forecast **plus** the lost margin from missing the in-store date.
-Then it recommends accept / modify / co-develop and drafts the follow-up and counter-offer emails.
+It automates the sourcing round: send the brief to vendors → read their replies → extract the
+predefined fields → chase missing info → store everything by vendor × product → once ≥70% of
+vendors are complete, score and rank all products → decide accept / request changes / decline →
+draft the emails. **Every outgoing email waits for human approval.**
 
-> *"Jingde is $0.90 cheaper FOB, but its 3,000-unit MOQ against an 1,800-unit forecast and the China
-> tariff make it $4.60 more expensive per unit sold than Hanoi Clayworks."*
+## Run the web app
 
-## Workflow
-
-```
-Brief ──► Vendors reply by email ──► [Agent] extract quotes ──► [costing.py] landed cost + MOQ + timeline risk
-                                                                          │
-           Draft emails (follow-ups, counter-offers, declines) ◄── Recommend accept / modify / co-develop
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --reload
+# open http://127.0.0.1:8000
 ```
 
-The agent does the language work (reading emails, judging spec fit, writing emails).
-All math runs in `tools/costing.py`, so the numbers are deterministic and testable.
+The app starts with fictional sample data (10 vendors, 12 products) in `var/pd_partner.db`.
+"reset demo" in the sidebar restores it. Run tests with `.venv/bin/python -m pytest -q tests`.
 
-## Repo layout
+### Demo walkthrough
+1. **Overview**: 6/10 vendors complete, threshold not reached yet; 3 emails waiting for approval.
+2. **Vendor responses → Saigon Drinkware**: the agent was unsure about capacity (blue). Check it and save → **threshold reached**.
+3. **Ningbo Polar**: 2 required fields missing (red) → approve the follow-up → "▶ Simulate vendor reply" → check & save.
+4. **Guangdong Lumi**: simulate reply → a field is missing → "Draft follow-up email".
+5. **Analysis**: drag the weight sliders or pick a preset; the ranking re-orders. Click a product to see why it scores what it does.
+6. **Decisions**: adjust any decision, then "Draft decision emails" → one email per vendor → approve.
+
+## Code map
 
 | Path | What it is |
 |---|---|
-| `agent/AGENTS.md` | The agent's standing instructions (uploaded as its ZooWork persona) |
-| `data/brief.md` | Sourcing brief: "Coastal Calm" Spring 2027 — ceramic vase (SKU A) + linen pillow cover (SKU B) |
-| `data/vendor_emails/` | 5 sample vendor replies (CN, VN, PT ceramics; IN, CN textiles), with deliberate traps |
-| `data/demand_forecast.csv` | Season demand + retail price per SKU |
-| `data/assumptions.json` | FX, freight, duty/tariff, timeline, salvage assumptions (**illustrative**, not verified HTS rates) |
-| `data/quotes.example.json` | Hand-extracted "answer key" for the sample emails |
-| `tools/costing.py` | Landed cost & inventory-risk scoring (stdlib only; runs locally and in the agent sandbox) |
-| `run_agent.py` | Creates/reuses the hosted agent, uploads inputs, runs the analysis, downloads `out/` |
-| `tests/` | Unit tests for the costing logic |
+| `app/fields.py` | **The predefined data fields** (single source of truth; required ones trigger follow-ups) |
+| `app/main.py` | FastAPI JSON API + serves the page |
+| `app/db.py` | SQLite tables: vendors, rounds, messages, products (by vendor × product), activity |
+| `app/scoring.py` | Scoring dimensions, weight presets, landed cost, accept/modify/decline rules |
+| `app/agent.py` | **Agent hooks**: email drafting, reply extraction, product scoring. Templates and fake data today; ZooWork agent later |
+| `app/seed.py` | Fictional sample round, vendors, products, trends |
+| `app/static/` | Frontend (`index.html`, `app.js`, `style.css`), plain JS, no build step |
+| `design/mockup.html` | The original static mockup |
 
-### Traps planted in the sample emails
-- **Jingde (CN vase):** lowest FOB, but MOQ 3,000 vs forecast 1,800 and +25% tariff.
-- **Hanoi (VN vase):** no ISTA drop test yet (adds a one-off lab cost).
-- **Porto (PT vase):** price in EUR, **no MOQ stated** → follow-up email needed.
-- **Panipat (IN pillow):** price in INR, MOQ is *per colour* (500 × 3), arrives 13 days late.
-- **Ningbo (CN pillow):** cheapest, but only 45% linen (spec ≥55%) and no OEKO-TEX → fails spec.
+## API used by the frontend
 
-## Setup
+| Area | Endpoints |
+|---|---|
+| Global | `GET /api/meta`, `GET /api/round` |
+| Overview | `GET /api/approvals`, `GET /api/activity` |
+| Outreach | `PUT /api/round`, `GET /api/vendors`, `POST /api/outreach` |
+| Responses | `GET /api/responses/{vendor_id}`, `PATCH /api/products/{id}`, `POST /api/products/{id}/confirm`, `POST /api/responses/{vendor_id}/followup` |
+| Database | `GET /api/products` |
+| Analysis | `GET /api/ranking?cost=&moq=&lead=&trend=&spec=&vendor=` |
+| Decisions | `PUT /api/products/{id}/decision`, `POST /api/decisions/draft` |
+| Approvals | `PATCH /api/messages/{id}`, `POST /api/messages/{id}/approve`, `POST /api/messages/{id}/discard` |
+| Demo only | `POST /api/demo/simulate-reply/{vendor_id}`, `POST /api/demo/reset` |
 
-```bash
-python3 -m venv .venv && source .venv/bin/activate   # or reuse ~/envs/zoowork
-pip install -r requirements.txt
-cp .env.example .env    # then paste your ZOOWORK_API_KEY
-```
+## Next steps
+- Wire `app/agent.py` to the ZooWork agent (extraction from real emails, drafting, scoring).
+- Real email in/out (Gmail) behind the approval step.
+- Live trend signals instead of sample data.
+- Possibly move the frontend to React; the JSON API stays the same.
 
-## Run
+## Earlier prototype (home decor, CLI)
 
-```bash
-# Costing only, offline, on the answer key
-python tools/costing.py data/quotes.example.json
-
-# Tests
-python -m unittest discover -s tests -v
-
-# Full agent run on ZooWork (billable): writes out/report.md, out/quotes.json, out/scored.json
-python run_agent.py
-
-# Remove the hosted agent when done
-python run_agent.py --teardown
-```
-
-## Ideas / next steps
-- Sample-round tracker: log each sample round's comments and open issues; cap the revise loop.
-- Negotiation simulator: what MOQ / price would make the runner-up win?
-- Open-to-buy check across the whole collection, not per SKU.
-- Real inbox ingestion (Gmail) instead of sample files.
+`agent/AGENTS.md`, `data/`, `tools/costing.py` and `run_agent.py` are the first prototype: a one-shot
+ZooWork agent run with landed-cost / MOQ-risk scoring for home decor
+(`python tools/costing.py data/quotes.example.json`). The costing logic can be reused for the
+drinkware "Cost & margin" and "MOQ fit" scores.
