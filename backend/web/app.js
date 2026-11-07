@@ -63,13 +63,10 @@ pages.start = async () => {
   </div>
   <div class="grid g2" style="align-items:start">
     <div class="card">
-      <h2>${replay ? `Vendors (${vendors.length} real replies)` : 'Demo vendors (simulated)'}</h2>
-      <p class="muted small">${replay
-        ? 'Each vendor answers our request with its real email (photos attached) and answers follow-ups only from what that email says.'
-        : 'These fictional vendors answer by themselves, each with a different behaviour.'}</p>
-      <table><thead><tr><th>Vendor</th><th>Country</th><th>${replay ? 'What is in the email' : 'Behaviour'}</th></tr></thead><tbody>
-        ${vendors.map(v => `<tr><td><b>${esc(v.name)}</b><div class="muted small">${esc(v.email)}</div></td><td>${esc(v.country)}</td><td class="small">${esc(v.demo_role)}</td></tr>`).join('')
-          || '<tr><td colspan="3" class="muted">Vendor simulator is off (SIM_MODE=off).</td></tr>'}
+      <h2>Vendors (${vendors.length})</h2>
+      <table><thead><tr><th>Vendor</th><th>Country</th></tr></thead><tbody>
+        ${vendors.map(v => `<tr><td><b>${esc(v.name)}</b><div class="muted small">${esc(v.email)}</div></td><td>${esc(v.country)}</td></tr>`).join('')
+          || '<tr><td colspan="2" class="muted">Vendor simulator is off (SIM_MODE=off).</td></tr>'}
       </tbody></table>
     </div>
     <div class="card">
@@ -214,7 +211,7 @@ pages.offers = async () => {
   const items = Object.fromEntries((run.brief_items || []).map(i => [i.sku, i.name]));
   return `<header class="top"><div><h1>Products</h1><div class="sub">One row per product a vendor proposed, extracted by the Extraction Agent from the email threads.</div></div></header>
   ${offers.length ? `<div class="card flush scroll-x"><table>
-    <thead><tr><th>Product</th><th>Vendor</th><th>Brief item</th><th class="right">Unit price</th><th class="right">MOQ</th><th class="right">Production</th><th>Path</th><th>Meets spec</th><th>Issues</th></tr></thead>
+    <thead><tr><th>Product</th><th>Vendor</th><th>Brief item</th><th class="right">Unit price</th><th class="right">MOQ</th><th class="right">Lead time</th><th>Path</th><th>Meets spec</th><th>Issues</th></tr></thead>
     <tbody>${offers.map(o => `<tr>
       <td><b>${esc(o.product_name)}</b><div class="muted small">${esc(o.design || '').slice(0, 90)}</div></td>
       <td>${esc(vname[o.thread_id] || '')}<div class="muted small">${esc(o.country || '')}</div></td>
