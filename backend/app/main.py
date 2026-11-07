@@ -15,6 +15,8 @@ from contextlib import asynccontextmanager
 from typing import Any, Literal
 
 from fastapi import FastAPI, Header, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from zoowork import create_zoowork_client
 
@@ -129,6 +131,15 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Brilliant PD Partner backend", version="0.1.0", lifespan=lifespan)
+
+# Web UI (plain HTML/JS in backend/web), served by this backend: open http://localhost:8000
+WEB_DIR = BACKEND_DIR / "web"
+app.mount("/web", StaticFiles(directory=WEB_DIR), name="web")
+
+
+@app.get("/", include_in_schema=False)
+def web_index() -> FileResponse:
+    return FileResponse(WEB_DIR / "index.html")
 
 
 def _run_or_404(run_id: str) -> dict[str, Any]:

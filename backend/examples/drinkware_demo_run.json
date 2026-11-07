@@ -1,16 +1,16 @@
 {
   "title": "Spring 2027 · Insulated & Glass drinkware",
-  "brief": "# Spring 2027 'Fresh Air' drinkware collection\n\nSoft pastels, matte powder coat, outdoor & on-the-go.\n\n- Food-contact compliance: FDA + LFGB test reports required (hard requirement); BPA-free lids\n- 18/8 (304) stainless steel for insulated items (hard requirement)\n- Dishwasher-safe lids preferred\n- Goods in our DC by 2027-03-15 for a 2027-04-01 launch\n\nPlease reply, for each product you propose, with: design & photos, material, capacity, lid type, FOB unit price & currency, MOQ (total and per colour), production lead time, sample time & cost, payment terms, port of loading, and certifications (FDA, LFGB, Prop 65).",
+  "brief": "# Spring 2027 'Fresh Air' drinkware collection\n\nSoft pastels, matte powder coat, outdoor & on-the-go.\n\nHard requirements (an offer that fails one of these does not meet spec):\n- FDA and LFGB food-contact test reports\n- 18/8 (304) stainless steel, double-wall vacuum, for insulated tumblers\n\nPreferences (nice to have, NOT hard requirements): BPA-free lids, dishwasher-safe lids, matte pastel finish, Prop 65 report\n- Goods in our DC by 2027-03-15 for a 2027-04-01 launch\n\nPlease reply, for each product you propose, with: design & photos, material, capacity, lid type, FOB unit price & currency, MOQ (total and per colour), production lead time, sample time & cost, payment terms, port of loading, and certifications (FDA, LFGB, Prop 65).",
   "brief_items": [
     {
       "sku": "A",
       "name": "Insulated tumbler 30-40 oz",
-      "requirements": "30-40 oz, 18/8 (304) stainless double-wall vacuum (hard requirement); straw or flip lid, leak-resistant; matte pastel colours; FDA + LFGB (hard requirement). Retail $34."
+      "requirements": "Hard requirements: 30-40 oz; 18/8 (304) stainless double-wall vacuum; FDA + LFGB reports. Preferences: straw or flip lid, leak-resistant, matte pastel colours, BPA-free lid. Retail $34."
     },
     {
       "sku": "B",
       "name": "Glass cup 16 oz with lid & straw",
-      "requirements": "14-20 oz glass cup with lid and straw; FDA + LFGB (hard requirement); clear or tinted. Retail $18."
+      "requirements": "Hard requirements: 14-20 oz glass cup with lid and straw; FDA + LFGB reports. Preferences: clear or tinted, BPA-free lid parts. Retail $18."
     }
   ],
   "vendors": [

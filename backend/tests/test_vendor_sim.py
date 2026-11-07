@@ -24,7 +24,10 @@ class PlanTest(unittest.TestCase):
         p = plan_reply(VENDORS["yongkang"], n_out=1, n_in=0)
         self.assertEqual(p["kind"], "first")
         self.assertEqual(len(p["facts"]["YK-40H Handle Tumbler"]), 14)
-        self.assertIsNone(plan_reply(VENDORS["yongkang"], n_out=2, n_in=1))  # thank-you mail: no reply
+        nothing = plan_reply(VENDORS["yongkang"], n_out=2, n_in=1)   # asked again: says so once
+        self.assertEqual(nothing["kind"], "nothing_new")
+        self.assertIn("YK-40H Handle Tumbler", write_scripted(VENDORS["yongkang"], nothing))
+        self.assertIsNone(plan_reply(VENDORS["yongkang"], n_out=3, n_in=2))  # then stays silent
 
     def test_withholding_releases_over_rounds(self):
         v = VENDORS["ningbo"]
@@ -33,7 +36,8 @@ class PlanTest(unittest.TestCase):
         self.assertNotIn("sampling_cost", first)
         self.assertEqual(plan_reply(v, 2, 1)["new_fields"], ["payment_terms", "port_of_loading"])
         self.assertEqual(plan_reply(v, 3, 2)["new_fields"], ["sampling_cost"])
-        self.assertIsNone(plan_reply(v, 4, 3))
+        self.assertEqual(plan_reply(v, 4, 3)["kind"], "nothing_new")
+        self.assertIsNone(plan_reply(v, 5, 4))
 
     def test_slow_vendor_needs_reminder(self):
         v = VENDORS["taichung"]

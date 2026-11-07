@@ -65,6 +65,17 @@ be injected with `POST /inbound-email` (requires `INBOUND_TOKEN`).
 Run status: `outreach → extracting → analyzing → awaiting_decision → accepted | denied_all` (or `needs_attention`).
 Thread status: `new → awaiting_reply ⇄ processing_reply → complete | declined | stalled`.
 
+## Web UI
+
+The backend serves the web UI itself (`web/`: plain HTML/JS, no build step). Start the backend and
+open **http://localhost:8000**:
+
+- **Start sourcing**: starts the drinkware demo run (simulated vendors, plus an optional real one).
+- **Mission control**: live vendor status cards and the agents' activity feed (polls every 3 s).
+- **Vendor conversations**: every email in each thread, and Vendor Memory with source quotes.
+- **Products**: offers from the Extraction Agent.
+- **Analysis & decision**: ranking, rationale and risks per product; accept any products or deny all.
+
 ## Demo: vendor simulator
 
 Six fictional drinkware vendors (`simulator/vendors.json`, addresses ending in `.sim`) answer the
