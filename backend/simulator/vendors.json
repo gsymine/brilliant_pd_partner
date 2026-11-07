@@ -25,7 +25,7 @@
           "certifications": "FDA and LFGB food-contact test reports"}},
         {"product_ref": "YK-20 Slim Tumbler", "brief_item": "A", "facts": {
           "design": "20 oz slim tumbler with slide lid, matte pastel colours",
-          "materials": "18/8 (304) stainless steel, double-wall vacuum insulated",
+          "materials": "18/8 (304) stainless steel, double-wall vacuum insulated; BPA-free lid",
           "capacity": "20 oz (590 ml)", "lid_type": "Slide lid",
           "unit_price": 2.60, "currency": "USD", "incoterm": "FOB Ningbo", "moq": "2,000 pcs, colours can be mixed",
           "production_days": "40 days", "sampling_days": "10 days", "sampling_cost": "USD 40, refunded on order",
@@ -47,7 +47,7 @@
       "products": [
         {"product_ref": "SD-40 Trek Tumbler", "brief_item": "A", "facts": {
           "design": "40 oz tumbler with leak-proof flip straw, matte sea-glass and oat colours",
-          "materials": "18/8 stainless steel with ceramic inner coating, double-wall vacuum",
+          "materials": "18/8 stainless steel with ceramic inner coating, double-wall vacuum; BPA-free lid",
           "capacity": "40 oz (1.2 L)", "lid_type": "Leak-proof flip straw lid",
           "unit_price": 4.30, "currency": "USD", "incoterm": "FOB Ho Chi Minh City", "moq": "1,000 pcs, colours can be mixed",
           "production_days": "40 days", "sampling_days": "10 days", "sampling_cost": "USD 30",
@@ -69,7 +69,7 @@
       "products": [
         {"product_ref": "NP-30 Polar Tumbler", "brief_item": "A", "facts": {
           "design": "30 oz tumbler, slide lid, colour can match pantone",
-          "materials": "304 stainless steel, double wall vacuum",
+          "materials": "304 stainless steel, double wall vacuum, lid bpa free",
           "capacity": "900 ml", "lid_type": "slide lid",
           "unit_price": 21.5, "currency": "CNY", "incoterm": "FOB Ningbo", "moq": "2000 pcs mix colour",
           "production_days": "35 days", "sampling_days": "7 days", "sampling_cost": "free, courier paid by buyer",
@@ -91,7 +91,7 @@
       "products": [
         {"product_ref": "TC-16 Ribbed Glass Cup", "brief_item": "B", "facts": {
           "design": "16 oz ribbed glass cup with bamboo lid and glass straw; clear, amber and sage",
-          "materials": "Soda-lime glass, natural bamboo lid with silicone ring, borosilicate straw",
+          "materials": "Soda-lime glass, natural bamboo lid with BPA-free silicone ring, borosilicate straw",
           "capacity": "16 oz (470 ml)", "lid_type": "Bamboo lid with straw hole",
           "unit_price": 2.20, "currency": "USD", "incoterm": "FOB Taichung", "moq": "1,000 pcs per colour",
           "production_days": "40 days", "sampling_days": "7 days", "sampling_cost": "Free of charge",

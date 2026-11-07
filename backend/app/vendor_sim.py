@@ -77,7 +77,12 @@ def plan_reply(vendor: dict[str, Any], n_out: int, n_in: int) -> dict[str, Any] 
 
     revealed = hidden_after(b, n_in - 1) - hidden_now
     if not revealed:
-        return None  # nothing new to say (e.g. our email was a thank-you)
+        # Nothing left to reveal. Answer once (e.g. the buyer asked for a category this vendor does not
+        # make, or for a field already given); after that, stay silent so the thread can close.
+        if n_in == len(b.get("withhold") or []) + 1:
+            offered = [p["product_ref"] for p in vendor["products"]]
+            return {"kind": "nothing_new", "offered": offered, "facts": {}, "new_fields": [], "late": False, "injection": None}
+        return None
     facts = {p["product_ref"]: {k: v for k, v in p["facts"].items() if k in revealed} for p in vendor["products"]}
     return {"kind": "more", "facts": facts, "new_fields": sorted(revealed), "late": False, "injection": None}
 
@@ -92,6 +97,13 @@ def _fmt(field: str, value: Any, facts: dict[str, Any]) -> str:
 def write_scripted(vendor: dict[str, Any], plan: dict[str, Any]) -> str:
     first = vendor.get("contact", vendor["name"]).split()[0]
     terse = vendor.get("style") == "terse"
+    if plan["kind"] == "nothing_new":
+        items = ", ".join(plan["offered"])
+        if terse:
+            return f"hi,\nwe only do {items} for this project, no other item. all info in our last mail.\n\nthanks\n{first}"
+        return (f"Dear team,\n\nThank you for your message. For this project we can only offer {items}; we do not "
+                f"produce the other item in your brief. All details for {items} are in our previous email.\n\n"
+                f"Best regards,\n{vendor['contact']}\n{vendor['name']}")
     if plan["kind"] == "decline":
         return (f"Dear team,\n\nThank you for your request. Unfortunately {plan['reason']}, so we cannot quote "
                 f"this time. We hope to work with you next season.\n\nBest regards,\n{vendor['contact']}\n{vendor['name']}")
@@ -122,6 +134,10 @@ def write_scripted(vendor: dict[str, Any], plan: dict[str, Any]) -> str:
 def llm_instructions(vendor: dict[str, Any], plan: dict[str, Any], buyer_email: str) -> str:
     if plan["kind"] == "decline":
         what = f"DECLINE. Reason: {plan['reason']}."
+    elif plan["kind"] == "nothing_new":
+        what = ("NOTHING NEW TO ADD. Say politely that for this project the vendor only offers: "
+                + ", ".join(plan["offered"]) + ". It does not make the other brief items. All details for these "
+                "products were in the previous email. Do not restate or invent any values.")
     else:
         what = ("FACTS FOR THIS REPLY (state all of them, nothing else):\n"
                 + json.dumps(plan["facts"], indent=2, ensure_ascii=False))

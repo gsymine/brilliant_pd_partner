@@ -8,7 +8,26 @@ predefined fields → chase missing info → store everything by vendor × produ
 vendors are complete, score and rank all products → decide accept / request changes / decline →
 draft the emails. **Every outgoing email waits for human approval.**
 
-## Run the web app
+## Run it (agents + web UI)
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt -r backend/requirements.txt
+cp backend/.env.example backend/.env   # set ZOOWORK_API_KEY; for the demo: EMAIL_MODE=dry_run,
+                                       # IMAP_ENABLED=false and the compressed demo timing lines
+cd backend && ../.venv/bin/uvicorn app.main:app --port 8000
+# open http://localhost:8000 → Start sourcing
+```
+
+The real system lives in `backend/` (3 ZooWork agents, email, vendor simulator, web UI in
+`backend/web/`). See [backend/README.md](backend/README.md).
+
+## Earlier UI mockup (sample data only)
+
+`app/` is the first clickable prototype with fictional sample data and its own mock API. It is
+**not connected to the agents**; kept for reference until its remaining ideas (approval queue,
+adjustable weights, request-changes decisions) are moved into `backend/web/`.
+
+### Run the mockup
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -19,7 +38,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 The app starts with fictional sample data (10 vendors, 12 products) in `var/pd_partner.db`.
 "reset demo" in the sidebar restores it. Run tests with `.venv/bin/python -m pytest -q tests`.
 
-### Demo walkthrough
+### Mockup walkthrough
 1. **Overview**: 6/10 vendors complete, threshold not reached yet; 3 emails waiting for approval.
 2. **Vendor responses → Saigon Drinkware**: the agent was unsure about capacity (blue). Check it and save → **threshold reached**.
 3. **Ningbo Polar**: 2 required fields missing (red) → approve the follow-up → "▶ Simulate vendor reply" → check & save.
@@ -27,7 +46,7 @@ The app starts with fictional sample data (10 vendors, 12 products) in `var/pd_p
 5. **Analysis**: drag the weight sliders or pick a preset; the ranking re-orders. Click a product to see why it scores what it does.
 6. **Decisions**: adjust any decision, then "Draft decision emails" → one email per vendor → approve.
 
-## Code map
+### Mockup code map
 
 | Path | What it is |
 |---|---|
@@ -40,7 +59,7 @@ The app starts with fictional sample data (10 vendors, 12 products) in `var/pd_p
 | `app/static/` | Frontend (`index.html`, `app.js`, `style.css`), plain JS, no build step |
 | `design/mockup.html` | The original static mockup |
 
-## API used by the frontend
+### Mockup API
 
 | Area | Endpoints |
 |---|---|
@@ -55,7 +74,7 @@ The app starts with fictional sample data (10 vendors, 12 products) in `var/pd_p
 | Demo only | `POST /api/demo/simulate-reply/{vendor_id}`, `POST /api/demo/reset` |
 
 ## Next steps
-- Wire `app/agent.py` to the ZooWork agent (extraction from real emails, drafting, scoring).
+- Move the mockup's remaining ideas (approval queue, weights, request changes) into `backend/web/`.
 - Real email in/out (Gmail) behind the approval step.
 - Live trend signals instead of sample data.
 - Possibly move the frontend to React; the JSON API stays the same.
