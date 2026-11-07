@@ -54,7 +54,8 @@ const state = {
 const pages = {};
 
 pages.start = async () => {
-  const vendors = await api('/sim/vendors').catch(() => []);
+  const [vendors, demo] = await Promise.all([api('/sim/vendors').catch(() => []), api('/demo/brief').catch(() => null)]);
+  const replay = demo && demo.dataset === 'brightwell';
   return `
   <div class="hero">
     <h1>Start a sourcing run</h1>
@@ -62,18 +63,20 @@ pages.start = async () => {
   </div>
   <div class="grid g2" style="align-items:start">
     <div class="card">
-      <h2>Demo vendors (simulated)</h2>
-      <p class="muted small">These fictional vendors answer by themselves, each with a different behaviour.</p>
-      <table><thead><tr><th>Vendor</th><th>Country</th><th>Behaviour</th></tr></thead><tbody>
+      <h2>${replay ? `Vendors (${vendors.length} real replies)` : 'Demo vendors (simulated)'}</h2>
+      <p class="muted small">${replay
+        ? 'Each vendor answers our request with its real email (photos attached) and answers follow-ups only from what that email says.'
+        : 'These fictional vendors answer by themselves, each with a different behaviour.'}</p>
+      <table><thead><tr><th>Vendor</th><th>Country</th><th>${replay ? 'What is in the email' : 'Behaviour'}</th></tr></thead><tbody>
         ${vendors.map(v => `<tr><td><b>${esc(v.name)}</b><div class="muted small">${esc(v.email)}</div></td><td>${esc(v.country)}</td><td class="small">${esc(v.demo_role)}</td></tr>`).join('')
           || '<tr><td colspan="3" class="muted">Vendor simulator is off (SIM_MODE=off).</td></tr>'}
       </tbody></table>
     </div>
     <div class="card">
       <h2>Brief</h2>
-      <div class="small"><b>Spring 2027 · Insulated &amp; Glass drinkware</b><br>
-        A · Insulated tumbler 30–40 oz (18/8 stainless, FDA + LFGB) · retail $34<br>
-        B · Glass cup 16 oz with lid &amp; straw (FDA + LFGB) · retail $18</div>
+      ${demo ? `<div class="small"><b>${esc(demo.title)}</b><br>
+        ${demo.brief_items.map(i => `${esc(i.name)}${i.requirements ? ` <span class="muted">· ${esc(i.requirements)}</span>` : ''}`).join('<br>')}</div>
+        ${demo.required_fields ? `<div class="muted small" style="margin-top:6px">Asks every vendor for ${demo.required_fields.length} fields per product.</div>` : ''}` : ''}
       <label class="lbl">Optional: add a real vendor (they reply from a real inbox)</label>
       <div class="grid" style="grid-template-columns:1fr 1.4fr 70px;gap:6px">
         <input type="text" id="rvName" placeholder="Name"><input type="text" id="rvEmail" placeholder="email@example.com"><input type="text" id="rvCountry" placeholder="CN">
@@ -242,10 +245,11 @@ pages.report = async () => {
   const table = (sku, ids) => `<div class="card flush" style="margin-bottom:14px">
     <div style="padding:12px 14px"><h2 style="margin:0">${esc(sku)} · ${esc(items[sku] || '')}</h2></div>
     <div class="scroll-x"><table>
-    <thead><tr>${decided ? '' : '<th>Accept</th>'}<th>#</th><th>Product</th><th>Vendor</th><th class="right">Landed</th><th class="right">Cost / sold unit</th><th class="right">Excess $</th><th class="right">Days late</th><th>Spec</th><th class="right">Score</th></tr></thead>
+    <thead><tr>${decided ? '' : '<th>Accept</th>'}<th>#</th><th>Image</th><th>Product</th><th>Vendor</th><th class="right">Landed</th><th class="right">Cost / sold unit</th><th class="right">Excess $</th><th class="right">Days late</th><th>Spec</th><th class="right">Score</th></tr></thead>
     <tbody>${ids.map(id => byId[id]).filter(Boolean).map(o => `<tr>
       ${decided ? '' : `<td><input type="checkbox" data-oid="${o.offer_id}" ${state.selected.has(o.offer_id) ? 'checked' : ''}></td>`}
       <td>${o.rank_in_item ?? ''}</td>
+      <td>${thumbs((report.images || {})[o.offer_id])}</td>
       <td><b>${esc(o.product_name)}</b> ${rec.has(o.offer_id) ? '<span class="rec" title="Recommended by the Analysis Agent">★ recommended</span>' : ''}
         <details><summary>Why</summary><div class="small" style="margin-top:6px">${esc(o.assessment?.rationale || '')}</div>
         ${(o.assessment?.risks || []).length ? `<ul class="small">${o.assessment.risks.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
@@ -290,6 +294,11 @@ pages.report.after = root => {
   const d = $('#denyAll', root);
   if (d) d.onclick = () => confirm('Deny all products in this run?') && decide({outcome: 'denied_all', accepted_offer_ids: []});
 };
+
+function thumbs(urls) {
+  if (!urls || !urls.length) return '<div class="thumb none" title="The vendor sent no photo for this product">no photo</div>';
+  return `<div class="thumbs">${urls.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener"><img class="thumb" src="${esc(u)}" alt="Product photo" loading="lazy"></a>`).join('')}</div>`;
+}
 
 function noRun() {
   return `<div class="hero"><h1>No sourcing run yet</h1><p class="sub">Start one and watch the agents work.</p>

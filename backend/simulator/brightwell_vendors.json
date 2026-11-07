@@ -1,0 +1,24 @@
+{
+  "_note": "8 vendors replying to Brightwell's RFQ BH-SR-2611. Six use their real emails (data/real_vendor_emails); two (eml_dir = simulator/modified_emails) were rewritten for the demo so they decline in their first reply. Each vendor answers our RFQ with its email (photos attached) and answers follow-ups ONLY from what that email says. Email address, contact name and body are read from the .eml file; .example addresses never leave the backend. demo_role lists what is in the email, nothing invented.",
+  "rfq": "00_RFQ_outbound.eml",
+  "vendors": [
+    {"key": "pawprint", "eml": "E01.eml", "name": "PawPrint Ceramics", "country": "CN", "reply_delay_s": 6,
+     "demo_role": "3 dog travel cups, complete specs and photos; price validity only 30 days"},
+    {"key": "whisker", "eml": "E02.eml", "name": "Whisker & Co. Gifts", "country": "CN", "reply_delay_s": 9,
+     "demo_role": "Cat mug has no price (asks our quantity first); no compliance documents"},
+    {"key": "remembrance", "eml": "E03.eml", "name": "Remembrance Keepsakes Ltd.", "country": "CN", "reply_delay_s": 8,
+     "demo_role": "Memorial pet cup: artwork licence covers US resale only; Floral Bunny mug is off-theme"},
+    {"key": "barnyard", "eml": "E04.eml", "name": "Barnyard Brights Trading Co.", "country": "CN", "reply_delay_s": 10,
+     "demo_role": "Prices in RMB, EXW, excl. VAT; third item has almost no specs ('see website')"},
+    {"key": "seasonal", "eml": "E08.eml", "name": "Seasonal Spirit Co", "country": "CN", "reply_delay_s": 9,
+     "demo_role": "Conflicting price for the Haunted House cup (6.90 in the table, 6.09 in the text)"},
+    {"key": "modernpattern", "eml": "E14.eml", "name": "Modern Pattern Studio", "country": "CN", "reply_delay_s": 8,
+     "demo_role": "Specs 'in the attached catalog' but no catalog is attached"},
+    {"key": "casavidrio", "eml": "E09_decline.eml", "eml_dir": "simulator/modified_emails", "name": "Casa Vidrio Guadalajara",
+     "country": "MX", "reply_delay_s": 7,
+     "demo_role": "Declines in the first reply (lines committed to another licensed programme)"},
+    {"key": "pearlpine", "eml": "E15_decline.eml", "eml_dir": "simulator/modified_emails", "name": "Pearl & Pine Programs",
+     "country": "CN", "reply_delay_s": 10,
+     "demo_role": "Declines in the first reply (sells fixed bundles only)"}
+  ]
+}

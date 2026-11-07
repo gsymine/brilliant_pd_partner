@@ -17,6 +17,7 @@ BACKEND = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND))
 os.environ["EMAIL_MODE"] = "dry_run"
 os.environ["IMAP_ENABLED"] = "false"
+os.environ.setdefault("DEMO_DATASET", "drinkware")  # simulator tests use the fictional vendors
 
 from zoowork import SessionEvent  # noqa: E402
 
@@ -233,7 +234,7 @@ class FakeRuntime:
         self.env = env
         self.calls: list[tuple] = []
 
-    async def start_session(self, role, owner_id, run_id, message, thread_id=None):
+    async def start_session(self, role, owner_id, run_id, message, thread_id=None, timeout=None):
         self.calls.append(("start", role, owner_id))
         if role == "communication":
             dispatch(self.env.ctx(role, run_id, thread_id), "send_email",
@@ -251,7 +252,7 @@ class FakeRuntime:
                 "offer_assessments": [{"offer_id": i, "recommendation": "recommend", "rationale": "r"} for i in ids]})
         return "sess"
 
-    async def send(self, role, owner_id, message, key):
+    async def send(self, role, owner_id, message, key, timeout=None):
         self.calls.append(("send", role, owner_id, key))
         run_id = self.env.db.get_thread(owner_id)["run_id"]
         dispatch(self.env.ctx(role, run_id, owner_id), "mark_thread_status", {"status": "declined", "reason": "test"})
@@ -309,8 +310,54 @@ class OrchestratorTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.env.db.get_thread(tids[0])["status"], "stalled")
         self.assertEqual(self.env.db.get_run(run_id)["status"], "awaiting_decision")
 
-    async def _noop_send(self, *a):
+    async def _noop_send(self, *a, **kw):
         return None
+
+
+class StuckRuntimeTest(unittest.IsolatedAsyncioTestCase):
+    async def test_failed_turn_is_retried_then_thread_released(self):
+        env = Env()
+        run_id, (tid,) = env.make_run(1)
+        env.db.update("vendor_threads", "id", tid, {"status": "processing_reply"})
+        calls = []
+
+        class Stuck:
+            async def send(self, role, owner_id, message, key, timeout=None):
+                calls.append(key)
+                raise asyncio.TimeoutError()
+        env.orch.runtime = Stuck()  # type: ignore[assignment]
+        with self.assertRaises(asyncio.TimeoutError):
+            await env.orch._comm_turn(tid, "NEW EMAIL", "k1")
+        self.assertEqual(calls, ["k1", "k1-retry"])                         # retried once
+        self.assertEqual(env.db.get_thread(tid)["status"], "awaiting_reply")  # not stuck in processing_reply
+
+    async def test_drive_timeout_interrupts_the_run(self):
+        env = Env()
+        run_id, (tid,) = env.make_run(1)
+
+        class HangingClient:
+            def __init__(self):
+                self.posted, self.interrupted = [], False
+
+            async def stream_events(self, agent_id, session_id, cursor=None):
+                if self.interrupted:  # after the interrupt the platform ends the run
+                    yield SessionEvent(seq=9, event_type="run.finished", payload={"status": "aborted"}, cursor="c9")
+                    return
+                await asyncio.sleep(3600)
+                yield  # pragma: no cover
+
+            async def post_events(self, agent_id, session_id, events):
+                self.posted += events
+                self.interrupted = True
+                return [{"accepted": True}]
+
+        client = HangingClient()
+        rt = ZooworkRuntime(client, env.db, env.settings, env.orch.tool_context)
+        env.db.save_session("communication", tid, run_id, "agt_1", "ses_1")
+        with self.assertRaises(asyncio.TimeoutError):
+            await rt._drive("communication", run_id, tid, "agt_1", "ses_1", timeout=0.05)
+        self.assertEqual(client.posted, [{"type": "user.interrupt"}])
+        self.assertEqual(env.db.get_session("communication", tid)["cursor"], "c9")  # drained past the aborted run
 
 
 class FakeClient:

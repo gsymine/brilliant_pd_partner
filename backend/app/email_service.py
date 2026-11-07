@@ -36,8 +36,10 @@ MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
 
 
 def is_simulated_address(address: str | None) -> bool:
-    """Demo vendors use addresses ending in .sim; their mail is answered by app/vendor_sim.py, never sent."""
-    return (address or "").lower().rsplit("@", 1)[-1].endswith(".sim")
+    """Demo vendors use addresses ending in .sim or .example (RFC 2606: never deliverable). Their mail is
+    answered by app/vendor_sim.py and never sent."""
+    domain = (address or "").lower().rsplit("@", 1)[-1]
+    return domain.endswith(".sim") or domain.endswith(".example")
 
 
 def thread_tag(thread_id: str) -> str:

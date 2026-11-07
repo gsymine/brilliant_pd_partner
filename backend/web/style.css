@@ -121,3 +121,9 @@ code{background:#eef0f4;border-radius:4px;padding:0 4px;font-size:12px}
 .rec{color:#b45309;font-weight:700}
 details summary{cursor:pointer;color:var(--accent);font-size:12px}
 .stepper .fail{border-color:var(--bad);color:var(--bad);font-weight:600}
+
+/* product photos on the analysis page */
+.thumbs{display:flex;gap:4px}
+.thumb{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff;display:block;transition:transform .15s}
+a:hover>.thumb{transform:scale(1.06)}
+.thumb.none{display:grid;place-items:center;font-size:10px;color:var(--muted);background:#f3f4f7;text-align:center}

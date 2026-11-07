@@ -13,13 +13,21 @@ Deterministic behaviour, LLM wording
     into a natural email in the persona's voice. Without ZooWork (SIM_MODE=scripted, or on any
     LLM error) a template writes the email instead, so the demo flow never depends on the LLM.
 
+Replay vendors (DEMO_DATASET=brightwell)
+    Real vendor replies (data/real_vendor_emails/*.eml). The first reply to our RFQ is the vendor's
+    original email, verbatim, with its photo attachments. Follow-ups are answered ONLY from what that
+    original email says; anything else gets "we cannot provide this at the moment".
+
 Stateless: the reply number for a thread is derived from the emails stored in the database.
 """
 from __future__ import annotations
 
 import asyncio
+import email
+import email.policy
 import json
 import logging
+from email.utils import parseaddr
 from email.utils import make_msgid
 from pathlib import Path
 from typing import Any, Awaitable, Callable
@@ -31,7 +39,10 @@ from .email_service import OPEN_THREAD_STATUSES, ParsedEmail, is_simulated_addre
 log = logging.getLogger(__name__)
 
 VENDORS_PATH = BACKEND_DIR / "simulator" / "vendors.json"
+REPLAY_VENDORS_PATH = BACKEND_DIR / "simulator" / "brightwell_vendors.json"
+REPLAY_EML_DIR = BACKEND_DIR.parent / "data" / "real_vendor_emails"
 MAX_REPLIES_PER_THREAD = 6
+MAX_REPLAY_FOLLOWUP_REPLIES = 3   # replay vendors answer at most this many follow-ups
 
 LABELS = {
     "design": "Design", "materials": "Material", "capacity": "Capacity", "lid_type": "Lid",
@@ -45,6 +56,40 @@ TERSE = {"production_days": "leadtime", "sampling_days": "sample", "sampling_cos
 
 def load_vendors(path: Path = VENDORS_PATH) -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8"))["vendors"]
+
+
+def read_eml(path: Path) -> dict[str, Any]:
+    """Body text, sender and attachments of one real vendor email."""
+    m = email.message_from_bytes(path.read_bytes(), policy=email.policy.default)
+    body, attachments = "", []
+    for part in m.walk():
+        if part.is_multipart():
+            continue
+        if part.get_content_disposition() in ("attachment", "inline") and part.get_filename():
+            attachments.append((part.get_filename(), part.get_content_type(), part.get_payload(decode=True) or b""))
+        elif part.get_content_type() == "text/plain" and not body:
+            body = part.get_content().strip()
+    name, addr = parseaddr(m.get("From", ""))
+    return {"body": body, "attachments": attachments, "contact": name, "email": addr.lower(),
+            "subject": str(m.get("Subject", ""))}
+
+
+def load_replay_vendors(path: Path = REPLAY_VENDORS_PATH, eml_dir: Path = REPLAY_EML_DIR) -> list[dict[str, Any]]:
+    """Vendors that answer with their real emails. Address and contact come from the .eml file."""
+    out = []
+    for v in json.loads(path.read_text(encoding="utf-8"))["vendors"]:
+        src = (BACKEND_DIR / v["eml_dir"] if v.get("eml_dir") else eml_dir) / v["eml"]  # eml_dir: demo-modified emails
+        eml = read_eml(src)
+        out.append({
+            **v, "email": eml["email"], "contact": eml["contact"], "style": "replay",
+            "personality": f"Real vendor reply ({v['eml']}). Knows only what its original email says.",
+            "behavior": {"type": "replay"}, "replay_eml": str(src), "products": [],
+        })
+    return out
+
+
+def load_dataset(name: str) -> list[dict[str, Any]]:
+    return load_replay_vendors() if name == "brightwell" else load_vendors()
 
 
 # ---------------------------------------------------------------- reply planning (deterministic)
@@ -61,6 +106,12 @@ def plan_reply(vendor: dict[str, Any], n_out: int, n_in: int) -> dict[str, Any] 
     "new_fields": [...], "late": bool, "injection": str|None}.
     """
     b = vendor.get("behavior") or {}
+    if b.get("type") == "replay":
+        if n_in == 0:
+            return {"kind": "replay", "late": False, "injection": None}
+        if n_in <= MAX_REPLAY_FOLLOWUP_REPLIES:
+            return {"kind": "grounded", "late": False, "injection": None}
+        return None
     if n_in >= MAX_REPLIES_PER_THREAD:
         return None
     if n_out <= int(b.get("ignore_first", 0)):
@@ -97,6 +148,10 @@ def _fmt(field: str, value: Any, facts: dict[str, Any]) -> str:
 def write_scripted(vendor: dict[str, Any], plan: dict[str, Any]) -> str:
     first = vendor.get("contact", vendor["name"]).split()[0]
     terse = vendor.get("style") == "terse"
+    if plan["kind"] == "grounded":
+        return (f"Dear team,\n\nThank you for your follow-up. At the moment we cannot provide more information than "
+                f"what is in our previous email; please refer to it for the details we have.\n\n"
+                f"Best regards,\n{vendor['contact']}\n{vendor['name']}")
     if plan["kind"] == "nothing_new":
         items = ", ".join(plan["offered"])
         if terse:
@@ -132,6 +187,14 @@ def write_scripted(vendor: dict[str, Any], plan: dict[str, Any]) -> str:
 
 
 def llm_instructions(vendor: dict[str, Any], plan: dict[str, Any], buyer_email: str) -> str:
+    if plan["kind"] == "grounded":
+        return (f"BUYER'S LATEST EMAIL:\n---\n{buyer_email[:4000]}\n---\n\n"
+                "GROUNDED REPLY. YOUR ORIGINAL EMAIL below is the ONLY thing you know about your products and terms:\n"
+                f"---\n{plan['original'][:6000]}\n---\n"
+                "Answer each of the buyer's questions: if the answer is stated in your original email, give it exactly "
+                "as stated there (same numbers, units, currency). If it is NOT stated there, say you cannot provide it "
+                "at the moment. Never invent or estimate a value, and never resolve a contradiction your original email "
+                "contains. Write the vendor's reply now (email body only).")
     if plan["kind"] == "decline":
         what = f"DECLINE. Reason: {plan['reason']}."
     elif plan["kind"] == "nothing_new":
@@ -153,7 +216,7 @@ class VendorSimulator:
     def __init__(self, settings: Settings, db: Database, vendors: list[dict[str, Any]] | None = None):
         self.s = settings
         self.db = db
-        self.vendors = {v["email"].lower(): v for v in (vendors if vendors is not None else load_vendors())}
+        self.vendors = {v["email"].lower(): v for v in (vendors if vendors is not None else load_dataset(settings.demo_dataset))}
         self.loop: asyncio.AbstractEventLoop | None = None
         self.deliver: Callable[[ParsedEmail], Awaitable[Any]] | None = None
         self.client: Any = None          # ZooWork client for LLM wording; None = templates only
@@ -202,14 +265,21 @@ class VendorSimulator:
                 run = self.db.get_run(thread["run_id"]) if thread else None
                 if not thread or thread["status"] not in OPEN_THREAD_STATUSES or not run or run["status"] != "outreach":
                     return
-                body = await self._write(thread, vendor, plan, outbound)
+                attachments: list[tuple[str, str, bytes]] = []
+                if plan["kind"] == "replay":  # the vendor's real email, verbatim, with its photos
+                    eml = read_eml(Path(vendor["replay_eml"]))
+                    body, attachments = eml["body"], eml["attachments"]
+                else:
+                    if plan["kind"] == "grounded":
+                        plan["original"] = read_eml(Path(vendor["replay_eml"]))["body"]
+                    body = await self._write(thread, vendor, plan, outbound)
                 subject = outbound["subject"] if outbound["subject"].lower().startswith("re:") else f"RE: {outbound['subject']}"
                 parsed = ParsedEmail(
                     from_addr=vendor["email"].lower(), to_addr=self.s.from_address, subject=subject,
                     message_id=make_msgid(domain=vendor["email"].split("@")[-1]),
                     in_reply_to=outbound.get("message_id"),
                     references=[m for m in [*(outbound.get("references_") or "").split(), outbound.get("message_id")] if m],
-                    body=body)
+                    body=body, attachments=attachments)
                 log.info("Simulated reply from %s (%s)", vendor["name"], plan["kind"])
                 if self.deliver:
                     await self.deliver(parsed)

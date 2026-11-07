@@ -76,6 +76,30 @@ open **http://localhost:8000**:
 - **Products**: offers from the Extraction Agent.
 - **Analysis & decision**: ranking, rationale and risks per product; accept any products or deny all.
 
+## Demo: real vendor emails (default, `DEMO_DATASET=brightwell`)
+
+`data/real_vendor_emails` holds Brightwell's real RFQ (`00_RFQ_outbound.eml`, pet-theme drinkware
+2027) and real vendor replies. The demo run (`examples/brightwell_pet_run.json`) uses that RFQ as
+the brief (14 items, 20 fields) with **8 vendors** (`simulator/brightwell_vendors.json`):
+
+- 6 answer with their **real email**, verbatim, photos attached: PawPrint (complete), Whisker (no
+  price), Remembrance (US-only licence), Barnyard (RMB, EXW), Seasonal Spirit (price contradiction),
+  Modern Pattern (catalog not attached).
+- 2 **decline in their first reply**: Casa Vidrio and Pearl & Pine. Their emails were rewritten for the
+  demo in `simulator/modified_emails/`; the originals in `data/` are untouched.
+- Follow-ups are answered only from each vendor's own email (ZooWork `vendor_sim` agent in
+  "grounded" mode, template fallback). Nothing is invented; contradictions are not resolved.
+- `.example` addresses (RFC 2606) never leave the backend.
+
+The Analysis & decision page shows each product's photo, matched by the item code in the
+attachment's file name (`GET /runs/{id}/attachments/{attachment_id}`, images only).
+`DEMO_DATASET=drinkware` switches back to the six fictional vendors below.
+
+## How it works page
+
+`/how-it-works` (sidebar → How it works): the PD manager's workflow, the agent flow, the solution
+architecture and where ZooWork is used (`web/how-it-works.html`, static, no dependencies).
+
 ## Demo: vendor simulator
 
 Six fictional drinkware vendors (`simulator/vendors.json`, addresses ending in `.sim`) answer the

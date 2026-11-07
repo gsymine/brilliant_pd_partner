@@ -1,0 +1,114 @@
+{
+  "_note": "Generated from data/real_vendor_emails (RFQ 00_RFQ_outbound.eml) and the 8 vendors in simulator/brightwell_vendors.json (two declines rewritten in simulator/modified_emails). No demand forecast was given, so costing compares unit prices in USD (fx only).",
+  "title": "Brightwell 2027 · Pet Lovers drinkware",
+  "brief": "# Brightwell Home & Gift - 2027 drinkware programme: PET LOVERS (RFQ BH-SR-2611)\n\nBrightwell Home & Gift is sourcing drinkware for our 2027 programme. Our theme this season is PET LOVERS: dogs, cats and pet owners, in gift-ready packaging. We also consider closely related animal and everyday designs that could be adapted to a pet theme.\r\n\r\nPlease reply by email with the products you can offer. For EACH product, please include:\r\n1. Item number and product name\r\n2. Drinkware type (travel cup, coffee mug, tumbler, pint glass, wine glass, gift set)\r\n3. Dimensions (W x L x H) and weight\r\n4. Materials (main body, lid or other parts)\r\n5. Care instructions (dishwasher, microwave, hand wash)\r\n6. Artist or designer of the artwork, and any licence limits\r\n7. Packaging (gift box, colour box, open stock) and capacity\r\n8. Theme, colour and season\r\n9. Country of origin\r\n10. Unit price in USD, price terms (Incoterm) and validity\r\n11. Minimum order quantity (MOQ) in pieces\r\n12. Production lead time and shipping time to the US\r\n13. Sample policy and cost\r\n14. Compliance documents (FDA, LFGB, Prop 65, lead and cadmium)\r\nPhotos of each item are very helpful.\r\n\r\nPlease send your reply by 6 November 2026. We will follow up with questions on anything missing.\n\nHow we judge offers (stated by the PD team):\n- Hard requirement: the product is drinkware (a cup, mug, tumbler or glass, or a gift set built around one). An offer that is not drinkware does not meet spec.\n- Not hard requirements, but weigh them: pet theme (dogs, cats, pet owners) or an animal/everyday design that could be adapted to it; gift-ready packaging; compliance documents (FDA, LFGB, Prop 65, lead and cadmium); artwork licence valid for our sales channels.\n- Prices in USD are preferred; a quote in another currency or Incoterm is accepted but must be stated clearly.",
+  "brief_items": [
+    {
+      "sku": "travel_cup",
+      "name": "Travel cup",
+      "requirements": "Ceramic or insulated travel cup with lid"
+    },
+    {
+      "sku": "mug",
+      "name": "Coffee mug",
+      "requirements": "Ceramic coffee mug"
+    },
+    {
+      "sku": "tumbler",
+      "name": "Tumbler",
+      "requirements": "Tumbler or canyon cup, usually with straw"
+    },
+    {
+      "sku": "pint_glass",
+      "name": "Pint glass",
+      "requirements": "Pint or drinking glass"
+    },
+    {
+      "sku": "wine_glass",
+      "name": "Wine glass",
+      "requirements": "Stemmed or stemless wine glass"
+    },
+    {
+      "sku": "gift_set",
+      "name": "Gift set",
+      "requirements": "Drinkware gift set (a cup plus gift items)"
+    }
+  ],
+  "vendors": [
+    {
+      "name": "PawPrint Ceramics",
+      "email": "lily.chen@pawprintceramics.example",
+      "country": "CN"
+    },
+    {
+      "name": "Whisker & Co. Gifts",
+      "email": "amy@whiskerandco.example",
+      "country": "CN"
+    },
+    {
+      "name": "Remembrance Keepsakes Ltd.",
+      "email": "daniel.wu@remembrancekeepsakes.example",
+      "country": "CN"
+    },
+    {
+      "name": "Barnyard Brights Trading Co.",
+      "email": "kevin@barnyardbrights.example",
+      "country": "CN"
+    },
+    {
+      "name": "Seasonal Spirit Co",
+      "email": "priya@seasonalspirit.example",
+      "country": "CN"
+    },
+    {
+      "name": "Modern Pattern Studio",
+      "email": "noah@modernpatternstudio.example",
+      "country": "CN"
+    },
+    {
+      "name": "Casa Vidrio Guadalajara",
+      "email": "carlos.mendoza@casavidrio.example",
+      "country": "MX"
+    },
+    {
+      "name": "Pearl & Pine Programs",
+      "email": "hannah@pearlandpineprograms.example",
+      "country": "CN"
+    }
+  ],
+  "required_fields": [
+    "item_number",
+    "drinkware_type",
+    "dimensions",
+    "weight",
+    "materials",
+    "care",
+    "artist_licence",
+    "packaging",
+    "capacity",
+    "theme_colour_season",
+    "country_of_origin",
+    "unit_price",
+    "currency",
+    "incoterm",
+    "price_validity",
+    "moq",
+    "production_days",
+    "shipping_days",
+    "sample_policy",
+    "certifications"
+  ],
+  "costing": {
+    "assumptions": {
+      "_note": "Illustrative FX only; Brightwell gave no forecast, duty or freight data.",
+      "fx_to_usd": {
+        "USD": 1.0,
+        "CNY": 0.14,
+        "RMB": 0.14,
+        "MXN": 0.055
+      }
+    }
+  },
+  "deadline_hours": 1,
+  "created_by": "demo"
+}

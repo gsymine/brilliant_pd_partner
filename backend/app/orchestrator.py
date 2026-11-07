@@ -100,7 +100,15 @@ class Orchestrator:
             "Step now: send the initial request (purpose 'rfq') with send_email, then end your turn. "
             "Vendor replies will arrive as new messages in this session."
         )
-        await self.rt.start_session("communication", thread["id"], run["id"], msg, thread_id=thread["id"])
+        try:
+            await self.rt.start_session("communication", thread["id"], run["id"], msg, thread_id=thread["id"],
+                                        timeout=self.s.comm_turn_timeout_s)
+        except Exception as exc:  # e.g. a stuck agent run: don't let one vendor block the whole run
+            log.exception("RFQ turn failed for thread %s", thread["id"])
+            t = self.db.get_thread(thread["id"])
+            if t and t["status"] == "new":
+                self.db.update("vendor_threads", "id", thread["id"],
+                               {"status": "stalled", "close_reason": f"agent could not send the request ({type(exc).__name__})"})
         await self._after_comm_turn(thread["id"])
 
     # ---- 2. Vendor reply loop --------------------------------------------------------------
@@ -131,8 +139,24 @@ class Orchestrator:
         return row
 
     async def _comm_turn(self, thread_id: str, message: str, key: str) -> None:
-        await self.rt.send("communication", thread_id, message, key)
-        await self._after_comm_turn(thread_id)
+        """One Communication turn. A stuck or failed turn is retried once with the same message; if that
+        fails too, the thread goes back to awaiting_reply so reminders and the deadline still apply."""
+        try:
+            for attempt in (1, 2):
+                try:
+                    await self.rt.send("communication", thread_id, message, key if attempt == 1 else f"{key}-retry",
+                                       timeout=self.s.comm_turn_timeout_s)
+                    break
+                except Exception as exc:
+                    t = self.db.get_thread(thread_id)
+                    if t:
+                        self.db.log(t["run_id"], "agent_run_failed",
+                                    f"Communication turn failed ({type(exc).__name__})"
+                                    + ("; retrying" if attempt == 1 else "; giving up on this turn"), thread_id)
+                    if attempt == 2:
+                        raise
+        finally:
+            await self._after_comm_turn(thread_id)
 
     async def _after_comm_turn(self, thread_id: str) -> None:
         t = self.db.get_thread(thread_id)

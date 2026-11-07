@@ -15,14 +15,15 @@ from contextlib import asynccontextmanager
 from typing import Any, Literal
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from zoowork import create_zoowork_client
 
 from .config import BACKEND_DIR, load_settings
 from .db import Database
-from .email_service import EmailService, ParsedEmail
+from .email_service import EmailService, ParsedEmail, read_attachment
+from .media import IMAGE_TYPES, offer_images
 from .orchestrator import Orchestrator
 from .tools import vendor_memory
 from .vendor_sim import VendorSimulator
@@ -84,7 +85,8 @@ orchestrator = Orchestrator(db, settings, email_service)
 simulator = VendorSimulator(settings, db) if settings.sim_mode != "off" else None
 if simulator:
     email_service.listeners.append(simulator.on_outbound)
-DEMO_RUN_PATH = BACKEND_DIR / "examples" / "drinkware_demo_run.json"
+DEMO_RUNS = {"brightwell": "brightwell_pet_run.json", "drinkware": "drinkware_demo_run.json"}
+DEMO_RUN_PATH = BACKEND_DIR / "examples" / DEMO_RUNS.get(settings.demo_dataset, DEMO_RUNS["drinkware"])
 
 
 async def _poll_inbox() -> None:
@@ -142,6 +144,12 @@ def web_index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
 
 
+@app.get("/how-it-works", include_in_schema=False)
+def how_it_works() -> FileResponse:
+    """Workflow, agent flow, solution design and where ZooWork is used."""
+    return FileResponse(WEB_DIR / "how-it-works.html")
+
+
 def _run_or_404(run_id: str) -> dict[str, Any]:
     run = db.get_run(run_id)
     if not run:
@@ -170,6 +178,15 @@ def sim_vendors() -> list[dict[str, Any]]:
         return []
     return [{k: v.get(k) for k in ("key", "name", "email", "contact", "country", "style", "demo_role")}
             for v in simulator.vendors.values()]
+
+
+@app.get("/demo/brief")
+def demo_brief() -> dict[str, Any]:
+    """What the demo run will ask for (shown on the start page)."""
+    body = json.loads(DEMO_RUN_PATH.read_text(encoding="utf-8"))
+    return {"dataset": settings.demo_dataset, "title": body["title"], "brief": body["brief"],
+            "brief_items": body["brief_items"], "required_fields": body.get("required_fields"),
+            "vendors": len(body["vendors"])}
 
 
 class DemoStartRequest(BaseModel):
@@ -241,7 +258,18 @@ def get_report(run_id: str) -> dict[str, Any]:
     report = db.get_report(run_id)
     if not report:
         raise HTTPException(404, "Report not ready")
-    return report
+    return {**report, "images": offer_images(db, run_id)}
+
+
+@app.get("/runs/{run_id}/attachments/{attachment_id}", include_in_schema=False)
+def get_attachment(run_id: str, attachment_id: str) -> Response:
+    """Serve a vendor's photo attachment (images only, and only for this run)."""
+    found = read_attachment(db, attachment_id)
+    email_row = db.get_email(attachment_id.split(":")[0])
+    if not found or not email_row or email_row["run_id"] != run_id or found[0]["content_type"] not in IMAGE_TYPES:
+        raise HTTPException(404, "Image not found")
+    return Response(content=found[1], media_type=found[0]["content_type"],
+                    headers={"Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff"})
 
 
 @app.post("/runs/{run_id}/close-outreach")

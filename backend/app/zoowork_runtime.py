@@ -107,7 +107,7 @@ class ZooworkRuntime:
 
     # ---- sessions --------------------------------------------------------------------------
     async def start_session(self, role: str, owner_id: str, run_id: str, message: str,
-                            thread_id: str | None = None) -> str:
+                            thread_id: str | None = None, timeout: float | None = None) -> str:
         """Create the role's session for owner_id with an opening message and drive the first turn."""
         agent_id = self.agent_ids[role]
         async with self._locks[f"{role}:{owner_id}"]:
@@ -123,10 +123,11 @@ class ZooworkRuntime:
                 )
                 session_id = session["session_id"]
                 self.db.save_session(role, owner_id, run_id, agent_id, session_id)
-            await self._drive(role, run_id, thread_id, agent_id, session_id)
+            await self._drive(role, run_id, thread_id, agent_id, session_id, timeout)
             return session_id
 
-    async def send(self, role: str, owner_id: str, message: str, idempotency_key: str) -> None:
+    async def send(self, role: str, owner_id: str, message: str, idempotency_key: str,
+                   timeout: float | None = None) -> None:
         """Post one more user.message into an existing session and drive that turn."""
         async with self._locks[f"{role}:{owner_id}"]:
             row = self.db.get_session(role, owner_id)
@@ -137,9 +138,12 @@ class ZooworkRuntime:
             if len(receipts) != 1 or receipts[0].get("accepted") is not True:
                 raise RuntimeError(f"Message not accepted by session {row['session_id']}: {receipts}")
             thread_id = owner_id if role == "communication" else None
-            await self._drive(role, row["run_id"], thread_id, row["agent_id"], row["session_id"])
+            await self._drive(role, row["run_id"], thread_id, row["agent_id"], row["session_id"], timeout)
 
-    async def _drive(self, role: str, run_id: str, thread_id: str | None, agent_id: str, session_id: str) -> str:
+    async def _drive(self, role: str, run_id: str, thread_id: str | None, agent_id: str, session_id: str,
+                     timeout: float | None = None) -> str:
+        """Drive one turn to run.finished. On timeout the ZooWork run is interrupted and the stream is
+        drained to its (aborted) run.finished, so the next turn starts from a clean cursor; then raises."""
         async def loop() -> str:
             while True:  # the server may close an idle stream before run.finished: reconnect
                 cursor = (self.db.session_by_id(session_id) or {}).get("cursor")
@@ -154,7 +158,16 @@ class ZooworkRuntime:
                         if outcome != "succeeded":
                             self.db.log(run_id, "agent_run_failed", f"{role} turn ended: {outcome}", thread_id)
                         return outcome
-        return await asyncio.wait_for(loop(), timeout=self.s.run_timeout_s)
+        try:
+            return await asyncio.wait_for(loop(), timeout=timeout or self.s.run_timeout_s)
+        except asyncio.TimeoutError:
+            self.db.log(run_id, "agent_run_failed", f"{role} turn timed out; interrupting it", thread_id)
+            try:
+                await self.client.post_events(agent_id, session_id, [{"type": "user.interrupt"}])
+                await asyncio.wait_for(loop(), timeout=60)  # consume the aborted run.finished
+            except Exception:
+                log.exception("Could not interrupt/drain timed-out %s turn in session %s", role, session_id)
+            raise
 
     async def _handle_tool(self, role: str, run_id: str, thread_id: str | None, agent_id: str,
                            session_id: str, call: Any) -> None:

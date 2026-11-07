@@ -73,7 +73,7 @@ class FakeAgents:
         dispatch(self.ctx("communication", run_id, thread_id), "send_email",
                  {"subject": "Spring 2027 drinkware request", "body": f"({purpose})", "purpose": purpose})
 
-    async def start_session(self, role, owner_id, run_id, message, thread_id=None):
+    async def start_session(self, role, owner_id, run_id, message, thread_id=None, timeout=None):
         if role == "communication":
             self._send(run_id, thread_id, "rfq")
         elif role == "extraction":
@@ -89,7 +89,7 @@ class FakeAgents:
                 "offer_assessments": [{"offer_id": i, "recommendation": "recommend", "rationale": "r"} for i in ids]})
         return "sess"
 
-    async def send(self, role, owner_id, message, key):
+    async def send(self, role, owner_id, message, key, timeout=None):
         thread = self.env.db.get_thread(owner_id)
         run_id = thread["run_id"]
         if message.startswith("No reply from the vendor"):

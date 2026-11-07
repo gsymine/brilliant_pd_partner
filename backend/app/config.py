@@ -47,6 +47,7 @@ class Settings:
     agent_label_app: str
     agent_label_env: str
     run_timeout_s: float               # max wall time for one agent turn (incl. tool calls)
+    comm_turn_timeout_s: float         # a Communication turn longer than this is interrupted and retried once
 
     # Email: outbound (SMTP)
     email_mode: str                    # "smtp" (real) or "dry_run" (log only, nothing leaves)
@@ -77,6 +78,7 @@ class Settings:
     # Vendor simulator (demo): vendors with *.sim addresses are answered by app/vendor_sim.py
     sim_mode: str                      # "llm" (ZooWork writes the wording) | "scripted" (templates) | "off"
     sim_speed: float                   # multiplier on each simulated vendor's reply delay
+    demo_dataset: str                  # "brightwell": real vendor emails (data/real_vendor_emails) | "drinkware": fictional vendors
 
 
 def load_settings() -> Settings:
@@ -89,6 +91,7 @@ def load_settings() -> Settings:
         agent_label_app=os.environ.get("PD_AGENT_LABEL_APP", "brilliant-pd-partner"),
         agent_label_env=os.environ.get("PD_AGENT_LABEL_ENV", "dev"),
         run_timeout_s=_float("PD_RUN_TIMEOUT_S", 900.0),
+        comm_turn_timeout_s=_float("PD_COMM_TURN_TIMEOUT_S", 300.0),
         email_mode=os.environ.get("EMAIL_MODE", "smtp").strip().lower(),
         smtp_host=os.environ.get("SMTP_HOST", ""),
         smtp_port=_int("SMTP_PORT", 465),
@@ -111,4 +114,5 @@ def load_settings() -> Settings:
         tick_seconds=_int("PD_TICK_SECONDS", 300),
         sim_mode=os.environ.get("SIM_MODE", "llm").strip().lower(),
         sim_speed=_float("SIM_SPEED", 1.0),
+        demo_dataset=os.environ.get("DEMO_DATASET", "brightwell").strip().lower(),
     )

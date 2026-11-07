@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How It Works · Brilliant PD Partner</title>
+<style>
+:root{
+  --bg:#f6f7fb; --panel:#fff; --ink:#151b2b; --muted:#667085; --line:#e4e7ee;
+  --human:#d97706; --human-soft:#fff6e5; --zoo:#6d28d9; --zoo-soft:#f2ecff; --zoo-mid:#a78bfa;
+  --code:#0f766e; --code-soft:#e3f4f1; --vend:#475569; --vend-soft:#eef2f6; --nav:#121826;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--zoo)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+/* ---- hero */
+.hero{background:radial-gradient(1200px 420px at 15% -10%,#3b1d7a 0%,transparent 60%),radial-gradient(900px 400px at 95% 10%,#0f5f58 0%,transparent 55%),var(--nav);color:#fff;padding:26px 0 56px}
+.topbar{display:flex;align-items:center;gap:12px;font-size:13px;color:#aab3c5}
+.topbar a{color:#cfd6e4;text-decoration:none;border:1px solid #2c3550;border-radius:8px;padding:6px 10px}
+.topbar a:hover{background:#1c2436}
+.topbar .sp{flex:1}
+.hero h1{font-size:38px;line-height:1.15;margin:34px 0 10px;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#c4b5fd,#5eead4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:720px;color:#c9d1e1;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{display:inline-flex;align-items:center;gap:7px;border-radius:30px;padding:5px 12px;font-size:13px;font-weight:600;background:#1c2436;color:#e5e9f2;border:1px solid #2c3550}
+.dot{width:10px;height:10px;border-radius:50%}
+.d-human{background:var(--human)} .d-zoo{background:var(--zoo-mid)} .d-code{background:#2dd4bf} .d-vend{background:#94a3b8}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:-34px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 8px 24px -16px rgba(20,30,60,.35)}
+.stat .v{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.stat .l{color:var(--muted);font-size:13px}
+.stat.zoo .v{color:var(--zoo)}
+/* ---- sections */
+section{padding:46px 0 6px}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--zoo)}
+h2{font-size:26px;margin:4px 0 6px;letter-spacing:-.01em}
+.lead{color:var(--muted);max-width:780px;margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.zoo-badge{display:inline-flex;align-items:center;gap:5px;background:var(--zoo);color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;letter-spacing:.02em;vertical-align:middle}
+.zoo-badge::before{content:"";width:7px;height:7px;border-radius:2px;background:#c4b5fd;transform:rotate(45deg)}
+/* ---- journey */
+.journey{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative}
+.journey::before{content:"";position:absolute;left:8%;right:8%;top:30px;height:3px;background:linear-gradient(90deg,var(--human),var(--zoo-mid),var(--code),var(--zoo-mid),var(--human));border-radius:3px;opacity:.55}
+.step{position:relative;text-align:center}
+.step .n{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;font-size:24px;background:#fff;border:3px solid var(--human);box-shadow:0 6px 18px -10px rgba(217,119,6,.8);position:relative;z-index:1}
+.step.auto .n{border-color:var(--zoo-mid);box-shadow:0 6px 18px -10px rgba(109,40,217,.8)}
+.step h3{font-size:15px;margin:0 0 4px}
+.step p{font-size:13px;color:var(--muted);margin:0}
+.who{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px}
+.who.h{background:var(--human-soft);color:var(--human)} .who.a{background:var(--zoo-soft);color:var(--zoo)}
+.bizmap{margin-top:18px;display:grid;grid-template-columns:170px repeat(4,1fr);gap:8px;font-size:13px;align-items:stretch}
+.bizmap div{background:var(--vend-soft);border-radius:10px;padding:9px 11px}
+.bizmap .hd{background:transparent;color:var(--muted);font-weight:600;padding-left:0}
+.bizmap .next{background:repeating-linear-gradient(45deg,#f3f4f7,#f3f4f7 8px,#eceef3 8px,#eceef3 16px);color:var(--muted)}
+/* ---- diagrams */
+.diagram{overflow-x:auto}
+.diagram svg{display:block;width:100%;min-width:900px;height:auto}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.flow{stroke-dasharray:7 6;animation:dash 1.1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-13}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+/* ---- architecture */
+.arch{display:grid;grid-template-columns:1fr 46px 1.35fr 46px 1.35fr;align-items:stretch}
+.col{border-radius:16px;padding:16px;border:1.5px solid var(--line);background:var(--panel)}
+.col h3{margin:0 0 2px;font-size:16px}
+.col .sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+.col.code{border-color:#9fd6cd;background:linear-gradient(180deg,var(--code-soft),#fff 40%)}
+.col.zoo{border-color:#c9b5fb;background:linear-gradient(180deg,var(--zoo-soft),#fff 40%);position:relative}
+.col.zoo::after{content:"ZooWork Managed Agents";position:absolute;top:-11px;right:14px;background:var(--zoo);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px}
+.box{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;margin-bottom:8px;font-size:13px}
+.box b{display:block;font-size:13.5px}
+.box span{color:var(--muted);font-size:12px}
+.col.zoo .box{border-color:#e2d6fe}
+.col.code .box{border-color:#cfe9e4}
+.link{display:grid;place-items:center;color:var(--muted);font-size:20px}
+.link small{display:block;font-size:10px;text-align:center;line-height:1.2}
+.ext{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.ext .box{background:var(--vend-soft);border-color:#dde3ea;margin:0}
+/* ---- zoowork usage */
+.uses{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.use{background:var(--panel);border:1px solid #e2d6fe;border-radius:14px;padding:16px;position:relative;overflow:hidden}
+.use::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--zoo),var(--zoo-mid))}
+.use h3{margin:4px 0 6px;font-size:15px}
+.use p{margin:0;font-size:13px;color:var(--muted)}
+.use code,.tools code,.notzoo code{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--zoo-soft);color:#4c1d95;border-radius:5px;padding:1px 5px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.tools .card{padding:16px}
+.tools h4{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
+.tools ul{margin:0;padding:0;list-style:none;font-size:13px}
+.tools li{padding:5px 0;border-bottom:1px dashed var(--line)}
+.tools li:last-child{border:none}
+.tools li span{color:var(--muted)}
+.notzoo{margin-top:14px;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.notzoo div{background:var(--code-soft);border-radius:12px;padding:12px;font-size:13px}
+.notzoo b{display:block;color:var(--code);margin-bottom:2px}
+.notzoo code{background:#cdebe5;color:#0b4f49}
+/* ---- principles */
+.principles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.pr{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.pr .i{font-size:22px}
+.pr b{display:block;margin:6px 0 4px;font-size:14px}
+.pr p{margin:0;font-size:12.5px;color:var(--muted)}
+footer{color:var(--muted);font-size:12px;padding:40px 0 50px;text-align:center}
+@media (max-width:960px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .journey{grid-template-columns:1fr;gap:18px}.journey::before{display:none}
+  .step{display:grid;grid-template-columns:60px 1fr;gap:12px;text-align:left}.step .n{margin:0}
+  .bizmap{grid-template-columns:1fr}
+  .arch{grid-template-columns:1fr}.link{transform:rotate(90deg);padding:6px 0}
+  .uses,.tools,.notzoo,.principles{grid-template-columns:1fr}
+  .hero h1{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="topbar"><b style="color:#fff">Brilliant PD Partner</b><span class="sp"></span><a href="/">← Back to the app</a></div>
+    <h1>From one click to a <em>ranked shortlist</em>.</h1>
+    <p>How a product development manager sources drinkware with Brilliant PD Partner: the workflow you see, the multi-agent flow behind it, the solution design, and exactly where ZooWork Managed Agents run.</p>
+    <div class="legend">
+      <span class="chip"><span class="dot d-human"></span>You (PD manager)</span>
+      <span class="chip"><span class="dot d-zoo"></span>ZooWork agent</span>
+      <span class="chip"><span class="dot d-code"></span>Backend code (deterministic)</span>
+      <span class="chip"><span class="dot d-vend"></span>Vendors &amp; email</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat zoo"><div class="v">4</div><div class="l">ZooWork agents, each defined by a <code>skill.md</code></div></div>
+    <div class="stat"><div class="v">1 / vendor</div><div class="l">Agent session per vendor conversation, with persistent memory</div></div>
+    <div class="stat zoo"><div class="v">14</div><div class="l">Custom tool bindings the agents call (12 distinct tools)</div></div>
+    <div class="stat"><div class="v">2</div><div class="l">Human steps: start the run, then decide</div></div>
+  </div>
+
+  <!-- ============================================================ 1. user workflow -->
+  <section>
+    <div class="kicker">1 · Your workflow</div>
+    <h2>What the PD manager does</h2>
+    <p class="lead">You start the run and you make the final call. Everything in between (emailing every vendor, chasing missing information, reading messy replies, costing and ranking) is done by agents while you watch.</p>
+    <div class="card">
+      <div class="journey">
+        <div class="step"><div class="n">🚀</div><div><h3>Start sourcing</h3><p>One click sends the brief (theme, items, 20 fields per product) to every vendor.</p><span class="who h">You · 1 click</span></div></div>
+        <div class="step auto"><div class="n">📡</div><div><h3>Mission control</h3><p>Live vendor cards and an activity feed: emails out and in, facts saved, conversations closed.</p><span class="who a">Agents work</span></div></div>
+        <div class="step auto"><div class="n">✉️</div><div><h3>Vendor conversations</h3><p>Every email, plus each vendor's memory: every fact with the quote it came from.</p><span class="who a">Agents work · you can read</span></div></div>
+        <div class="step auto"><div class="n">📊</div><div><h3>Analysis</h3><p>Products ranked with photos, cost, score, the agent's rationale and risks.</p><span class="who a">Agents work</span></div></div>
+        <div class="step"><div class="n">🏁</div><div><h3>Decide</h3><p>Accept any products from any vendors, or deny all. Agents recommend; only you decide.</p><span class="who h">You · decision</span></div></div>
+      </div>
+      <div class="bizmap">
+        <div class="hd">Business process<br><span style="font-weight:400">(solution design/workflow.png)</span></div>
+        <div>Send theme &amp; requests to vendors</div>
+        <div>Vendors reply by email: designs, materials, price, lead time, MOQ</div>
+        <div>Product development decision: accept · modify · co-develop</div>
+        <div class="next">Collaborate with vendor &amp; sample approval: next phase</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2. agent flow -->
+  <section>
+    <div class="kicker">2 · Agent flow</div>
+    <h2>What happens behind the click</h2>
+    <p class="lead">Three agents with one job each, handing work to each other through the backend. One Communication Agent session per vendor runs in parallel; extraction starts only once every vendor conversation is closed.</p>
+    <div class="card diagram">
+      <svg viewBox="0 0 1200 650" role="img" aria-labelledby="flowTitle flowDesc">
+        <title id="flowTitle">Agent flow</title>
+        <desc id="flowDesc">Swimlanes for the PD manager, the backend, ZooWork agents and vendors, showing the eight steps from starting a run to the human decision.</desc>
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6478"/></marker>
+          <marker id="ahz" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6d28d9"/></marker>
+          <linearGradient id="zg" x1="0" x2="1"><stop offset="0" stop-color="#f2ecff"/><stop offset="1" stop-color="#ebe3ff"/></linearGradient>
+          <filter id="sh" x="-10%" y="-10%" width="120%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1e1b4b" flood-opacity=".12"/></filter>
+        </defs>
+
+        <!-- lanes -->
+        <rect x="0" y="0" width="1200" height="110" fill="#fff8ec"/>
+        <rect x="0" y="110" width="1200" height="150" fill="#eef8f6"/>
+        <rect x="0" y="260" width="1200" height="230" fill="url(#zg)"/>
+        <rect x="0" y="490" width="1200" height="160" fill="#f1f4f8"/>
+        <g font-size="12" font-weight="700" letter-spacing=".06em">
+          <text x="16" y="28" fill="#b45309">PD MANAGER</text>
+          <text x="16" y="136" fill="#0f766e">BACKEND · FastAPI</text>
+          <text x="16" y="286" fill="#6d28d9">ZOOWORK MANAGED AGENTS</text>
+          <text x="16" y="516" fill="#475569">VENDORS · EMAIL</text>
+        </g>
+        <g transform="translate(16,296)"><rect width="128" height="20" rx="5" fill="#6d28d9"/><text x="64" y="14" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">runs on ZooWork</text></g>
+
+        <!-- nodes: human -->
+        <g filter="url(#sh)">
+          <rect x="170" y="36" width="170" height="54" rx="12" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+          <text x="255" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#151b2b">🚀 Start sourcing</text>
+          <text x="255" y="78" text-anchor="middle" font-size="11.5" fill="#667085">brief + 8 vendors</text>
+
+          <rect x="830" y="36" width="190" height="54" rx="12" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+          <text x="925" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#151b2b">🏁 Review &amp; decide</text>
+          <text x="925" y="78" text-anchor="middle" font-size="11.5" fill="#667085">accept any products, or deny all</text>
+        </g>
+
+        <!-- nodes: backend -->
+        <g filter="url(#sh)">
+          <rect x="170" y="150" width="190" height="82" rx="12" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="265" y="176" text-anchor="middle" font-size="13.5" font-weight="700" fill="#151b2b">Orchestrator</text>
+          <text x="265" y="195" text-anchor="middle" font-size="11.5" fill="#667085">creates the run, opens</text>
+          <text x="265" y="211" text-anchor="middle" font-size="11.5" fill="#667085">1 session per vendor</text>
+
+          <rect x="455" y="150" width="200" height="82" rx="12" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="555" y="176" text-anchor="middle" font-size="13.5" font-weight="700" fill="#151b2b">🧠 Vendor Memory</text>
+          <text x="555" y="195" text-anchor="middle" font-size="11.5" fill="#667085">SQLite · versioned facts</text>
+          <text x="555" y="211" text-anchor="middle" font-size="11.5" fill="#667085">each with source quote</text>
+
+          <rect x="700" y="150" width="150" height="82" rx="12" fill="#fff" stroke="#0f766e" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="775" y="176" text-anchor="middle" font-size="13.5" font-weight="700" fill="#151b2b">🚪 Handoff gate</text>
+          <text x="775" y="195" text-anchor="middle" font-size="11.5" fill="#667085">all vendors complete,</text>
+          <text x="775" y="211" text-anchor="middle" font-size="11.5" fill="#667085">declined or stalled</text>
+
+          <rect x="1000" y="150" width="180" height="82" rx="12" fill="#fff" stroke="#0f766e" stroke-width="1.5"/>
+          <text x="1090" y="176" text-anchor="middle" font-size="13.5" font-weight="700" fill="#151b2b">🧮 Costing &amp; scoring</text>
+          <text x="1090" y="195" text-anchor="middle" font-size="11.5" fill="#667085">FX, landed cost, MOQ risk,</text>
+          <text x="1090" y="211" text-anchor="middle" font-size="11.5" fill="#667085">0-100 score, rankings</text>
+        </g>
+
+        <!-- nodes: zoowork -->
+        <g filter="url(#sh)">
+          <rect x="250" y="320" width="330" height="128" rx="14" fill="#fff" stroke="#6d28d9" stroke-width="2"/>
+          <rect x="262" y="332" width="74" height="18" rx="5" fill="#6d28d9"/><text x="299" y="345" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">× 8 sessions</text>
+          <text x="415" y="372" text-anchor="middle" font-size="15" font-weight="800" fill="#151b2b">Communication Agent</text>
+          <text x="415" y="392" text-anchor="middle" font-size="11.5" fill="#667085">RFQ → read reply → save facts → follow up</text>
+          <text x="415" y="408" text-anchor="middle" font-size="11.5" fill="#667085">until the checklist is complete</text>
+          <text x="415" y="432" text-anchor="middle" font-size="10.5" fill="#6d28d9" font-family="ui-monospace,Consolas,monospace">send_email · save_vendor_facts · mark_thread_status</text>
+
+          <rect x="690" y="336" width="180" height="96" rx="14" fill="#fff" stroke="#6d28d9" stroke-width="2"/>
+          <text x="780" y="368" text-anchor="middle" font-size="15" font-weight="800" fill="#151b2b">Extraction Agent</text>
+          <text x="780" y="388" text-anchor="middle" font-size="11.5" fill="#667085">1 offer per product,</text>
+          <text x="780" y="404" text-anchor="middle" font-size="11.5" fill="#667085">reads emails &amp; photos</text>
+          <text x="780" y="422" text-anchor="middle" font-size="10.5" fill="#6d28d9" font-family="ui-monospace,Consolas,monospace">save_offers</text>
+
+          <rect x="980" y="336" width="200" height="96" rx="14" fill="#fff" stroke="#6d28d9" stroke-width="2"/>
+          <text x="1080" y="368" text-anchor="middle" font-size="15" font-weight="800" fill="#151b2b">Analysis Agent</text>
+          <text x="1080" y="388" text-anchor="middle" font-size="11.5" fill="#667085">judges spec fit &amp; risk,</text>
+          <text x="1080" y="404" text-anchor="middle" font-size="11.5" fill="#667085">recommends with rationale</text>
+          <text x="1080" y="422" text-anchor="middle" font-size="10.5" fill="#6d28d9" font-family="ui-monospace,Consolas,monospace">run_costing · save_analysis_report</text>
+        </g>
+
+        <!-- nodes: vendors -->
+        <g filter="url(#sh)">
+          <rect x="250" y="540" width="330" height="80" rx="14" fill="#fff" stroke="#64748b" stroke-width="1.5"/>
+          <text x="415" y="568" text-anchor="middle" font-size="14" font-weight="700" fill="#151b2b">✉️ 8 vendors</text>
+          <text x="415" y="587" text-anchor="middle" font-size="11.5" fill="#667085">6 quote (real emails, photos attached)</text>
+          <text x="415" y="603" text-anchor="middle" font-size="11.5" fill="#667085">2 decline in their first reply</text>
+          <rect x="690" y="548" width="250" height="64" rx="12" fill="#fff" stroke="#c9b5fb" stroke-dasharray="5 4"/>
+          <text x="815" y="573" text-anchor="middle" font-size="12.5" font-weight="700" fill="#151b2b">Vendor simulator (demo)</text>
+          <text x="815" y="592" text-anchor="middle" font-size="11" fill="#667085">ZooWork vendor_sim agent answers follow-ups</text>
+          <text x="815" y="606" text-anchor="middle" font-size="11" fill="#667085">only from each vendor's original email</text>
+        </g>
+
+        <!-- edges -->
+        <g fill="none" stroke-width="2.2">
+          <path class="flow" d="M255 90 V150" stroke="#5b6478" marker-end="url(#ah)"/>
+          <path class="flow" d="M300 232 V320" stroke="#5b6478" marker-end="url(#ah)"/>
+          <path class="flow" d="M380 448 V540" stroke="#6d28d9" marker-end="url(#ahz)"/>
+          <path class="flow" d="M450 540 V448" stroke="#475569" marker-end="url(#ah)"/>
+          <path class="flow" d="M500 320 C500 280 540 260 545 232" stroke="#6d28d9" marker-end="url(#ahz)"/>
+          <path class="flow" d="M655 191 H700" stroke="#5b6478" marker-end="url(#ah)"/>
+          <path class="flow" d="M775 232 V336" stroke="#5b6478" marker-end="url(#ah)"/>
+          <path class="flow" d="M870 384 H980" stroke="#6d28d9" marker-end="url(#ahz)"/>
+          <path class="flow" d="M1060 336 V232" stroke="#6d28d9" marker-end="url(#ahz)"/>
+          <path class="flow" d="M1120 232 V336" stroke="#0f766e" marker-end="url(#ah)"/>
+          <path class="flow" d="M1180 384 H1192 V63 H1020" stroke="#6d28d9" marker-end="url(#ahz)"/>
+          <path d="M580 600 H690" stroke="#c9b5fb" stroke-dasharray="3 4"/>
+        </g>
+
+        <!-- edge labels -->
+        <g font-size="11" fill="#475569">
+          <text x="388" y="500">RFQ &amp; follow-ups</text>
+          <text x="458" y="526">replies</text>
+          <text x="512" y="262" fill="#6d28d9">facts</text>
+          <text x="880" y="374" fill="#6d28d9">offers</text>
+          <text x="1126" y="290" fill="#0f766e">numbers</text>
+          <text x="1012" y="290" fill="#6d28d9">call</text>
+          <text x="1050" y="56" fill="#6d28d9">report</text>
+        </g>
+
+        <!-- step numbers -->
+        <g font-size="12" font-weight="800" text-anchor="middle" fill="#fff">
+          <circle cx="232" cy="120" r="11" fill="#d97706"/><text x="232" y="124">1</text>
+          <circle cx="282" cy="276" r="11" fill="#0f766e"/><text x="282" y="280">2</text>
+          <circle cx="362" cy="494" r="11" fill="#6d28d9"/><text x="362" y="498">3</text>
+          <circle cx="478" cy="270" r="11" fill="#6d28d9"/><text x="478" y="274">4</text>
+          <circle cx="678" cy="176" r="11" fill="#0f766e"/><text x="678" y="180">5</text>
+          <circle cx="757" cy="286" r="11" fill="#6d28d9"/><text x="757" y="290">6</text>
+          <circle cx="1040" cy="270" r="11" fill="#6d28d9"/><text x="1040" y="274">7</text>
+          <circle cx="1040" cy="44" r="11" fill="#d97706"/><text x="1040" y="48">8</text>
+        </g>
+      </svg>
+      <ol style="margin:14px 0 0;padding-left:20px;font-size:13.5px;color:#3b4456;columns:2;column-gap:36px">
+        <li>You click <b>Start sourcing</b>.</li>
+        <li>The orchestrator creates the run and opens one ZooWork session per vendor.</li>
+        <li>Each Communication Agent session emails its vendor and keeps the conversation going.</li>
+        <li>Every fact is saved to Vendor Memory with its source quote; follow-ups ask only for gaps.</li>
+        <li>The gate opens when every conversation is complete, declined or stalled (or you stop waiting).</li>
+        <li>The Extraction Agent turns all threads into one structured offer per product.</li>
+        <li>The Analysis Agent gets all numbers from the costing tool and writes the recommendation.</li>
+        <li>You review the ranked products, with photos, and decide.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3. solution design -->
+  <section>
+    <div class="kicker">3 · Solution design</div>
+    <h2>Architecture</h2>
+    <p class="lead">One backend serves the web app and drives the agents. Agents never touch email, the database or the math directly: they call tools, and the backend executes every tool call, scoped to one run and one vendor.</p>
+    <div class="arch">
+      <div class="col">
+        <h3>🖥️ Web app</h3><div class="sub">backend/web · plain HTML/JS</div>
+        <div class="box"><b>Start sourcing</b><span>brief and vendors</span></div>
+        <div class="box"><b>Mission control</b><span>live status, polls every 3 s</span></div>
+        <div class="box"><b>Vendor conversations</b><span>emails + Vendor Memory</span></div>
+        <div class="box"><b>Products</b><span>extracted offers</span></div>
+        <div class="box"><b>Analysis &amp; decision</b><span>ranking, photos, decide</span></div>
+      </div>
+      <div class="link">⇄<small>JSON<br>API</small></div>
+      <div class="col code">
+        <h3>⚙️ Backend</h3><div class="sub">FastAPI · deterministic code</div>
+        <div class="box"><b>Orchestrator</b><span>run &amp; thread state machine, reminders, deadline, handoff gate</span></div>
+        <div class="box"><b>Tool handlers</b><span>execute every agent tool call, scoped to its run and vendor</span></div>
+        <div class="box"><b>Costing &amp; scoring</b><span>FX, landed cost, MOQ and timeline risk, 0-100 score, rankings</span></div>
+        <div class="box"><b>Email service</b><span>SMTP out, IMAP in, reply-to-thread matching; recipient locked per vendor</span></div>
+        <div class="box"><b>SQLite</b><span>runs, emails, versioned vendor facts, offers, reports, decisions</span></div>
+      </div>
+      <div class="link">⇄<small>ZooWork<br>SDK</small></div>
+      <div class="col zoo">
+        <h3>🤖 Agents</h3><div class="sub">each agent's instructions = its skill.md</div>
+        <div class="box"><b>Communication Agent</b><span>one session per vendor · writes and reads emails</span></div>
+        <div class="box"><b>Extraction Agent</b><span>one session per run · structures all replies</span></div>
+        <div class="box"><b>Analysis Agent</b><span>one session per run · judges and recommends</span></div>
+        <div class="box"><b>Vendor simulator agent</b><span>demo only · writes vendor replies</span></div>
+        <div class="box" style="background:var(--zoo-soft)"><b>Sessions · custom tools · event stream</b><span>agents request tools; the backend runs them and returns results</span></div>
+      </div>
+    </div>
+    <div class="ext">
+      <div class="box"><b>📮 Real vendors</b><span>Gmail via SMTP/IMAP (set EMAIL_MODE=smtp). Any address not ending in .sim or .example.</span></div>
+      <div class="box"><b>🎭 Demo vendors</b><span>8 Brightwell vendors from data/real_vendor_emails; their mail never leaves the backend.</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 4. zoowork -->
+  <section>
+    <div class="kicker">4 · Where ZooWork is used</div>
+    <h2>ZooWork does the thinking. The backend does the doing.</h2>
+    <p class="lead">Every judgement call runs on ZooWork Managed Agents. Everything that must be exact, safe or auditable stays in plain backend code.</p>
+    <div class="uses">
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Managed agents</h3><p>4 hosted agents, created once and found again by labels. Each agent's <code>skill.md</code> is loaded as its instructions; a changed skill updates the agent on the next start.</p></div>
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Sessions as memory</h3><p>One long-lived session per vendor conversation, days of back-and-forth in one context. Extraction and Analysis get one session per run.</p></div>
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Application-executed custom tools</h3><p>Agents decide which tool to call and when. The run pauses, the backend executes the tool, and its result (or an error the agent can fix) goes back with <code>resolve_custom_tool_call</code>.</p></div>
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Event streaming</h3><p>The backend streams each turn's events (<code>stream_events</code>), saves the cursor, and stops on <code>run.finished</code>. After a restart it resumes and finishes pending tool calls.</p></div>
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Idempotent operations</h3><p>Agents, sessions and messages are created with idempotency keys, so a retry never creates a second agent or a duplicate turn.</p></div>
+      <div class="use"><span class="zoo-badge">ZooWork</span><h3>Vendor role-play (demo)</h3><p>A fourth agent writes vendor replies in "grounded" mode: it may only use what the vendor's original email says, and never invents a value.</p></div>
+    </div>
+    <div class="tools">
+      <div class="card"><h4><span class="zoo-badge">ZooWork</span> Communication Agent</h4><ul>
+        <li><code>send_email</code> <span>to this vendor only</span></li>
+        <li><code>read_thread</code> <span>full email history</span></li>
+        <li><code>save_vendor_facts</code> <span>fact + source quote</span></li>
+        <li><code>get_vendor_memory</code> <span>what is still missing</span></li>
+        <li><code>mark_thread_status</code> <span>complete · declined · stalled</span></li></ul></div>
+      <div class="card"><h4><span class="zoo-badge">ZooWork</span> Extraction Agent</h4><ul>
+        <li><code>list_vendor_threads</code> <span>all vendors in the run</span></li>
+        <li><code>read_thread</code> <span>emails of one vendor</span></li>
+        <li><code>get_vendor_memory</code> <span>saved facts</span></li>
+        <li><code>read_attachment</code> <span>photos, text files</span></li>
+        <li><code>save_offers</code> <span>schema-validated offers</span></li></ul></div>
+      <div class="card"><h4><span class="zoo-badge">ZooWork</span> Analysis Agent</h4><ul>
+        <li><code>get_run_context</code> <span>brief, items, fields</span></li>
+        <li><code>get_offers</code> <span>all products</span></li>
+        <li><code>run_costing</code> <span>deterministic numbers</span></li>
+        <li><code>save_analysis_report</code> <span>needs every offer assessed</span></li></ul></div>
+    </div>
+    <div class="notzoo">
+      <div><b>🧮 Math</b>Costs, scores and rankings: <code>costing.py</code></div>
+      <div><b>🔒 Recipients</b>Fixed per vendor session; an agent cannot choose who gets an email</div>
+      <div><b>🚦 Flow control</b>State machine, reminders, deadline and handoff gate</div>
+      <div><b>📮 Email transport</b>SMTP and IMAP, threading by reply headers</div>
+      <div><b>🗄️ Records</b>SQLite: every email, every fact version, every decision</div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 5. principles -->
+  <section>
+    <div class="kicker">5 · Design principles</div>
+    <h2>Why it is built this way</h2>
+    <div class="principles">
+      <div class="pr"><div class="i">⚖️</div><b>Agents judge, code calculates</b><p>No number in a recommendation is computed by a language model.</p></div>
+      <div class="pr"><div class="i">🧵</div><b>One vendor, one session</b><p>Conversations never mix; each keeps its own memory.</p></div>
+      <div class="pr"><div class="i">🧠</div><b>Nothing is lost</b><p>Facts are versioned and keep the quote they came from.</p></div>
+      <div class="pr"><div class="i">🛡️</div><b>Vendor email is untrusted</b><p>Instructions hidden in a vendor's email are treated as data.</p></div>
+      <div class="pr"><div class="i">🙋</div><b>The human decides</b><p>Agents recommend; accepting products is always your call.</p></div>
+    </div>
+  </section>
+
+  <footer>Brilliant PD Partner · Fashion &amp; Finance Hackathon 2026 · built on ZooWork Managed Agents</footer>
+</div>
+</body>
+</html>
