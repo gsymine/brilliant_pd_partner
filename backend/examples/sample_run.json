@@ -1,0 +1,110 @@
+{
+  "title": "Coastal Calm - Spring 2027",
+  "brief": "# Sourcing Brief — \"Coastal Calm\" Collection, Spring 2027\n\n**Brand:** Harbor & Hearth (fictional DTC home decor brand)\n**In-store / on-site date:** 2027-03-15\n**Target margin (IMU):** 65%\n\n## Theme\nRelaxed coastal living: sand, sea-glass and oat tones; natural textures; matte or reactive glazes;\nnothing glossy or \"nautical kitsch\" (no anchors, no rope prints).\n\n## Items requested\n\n### SKU A — Ceramic table vase\n- Height 25–30 cm, stoneware preferred\n- Colors: sea-glass green, sand, oat (matte or reactive glaze)\n- Retail price: $48\n- Must be watertight; must pass drop-test packaging (ISTA 1A)\n\n### SKU B — Linen throw pillow cover\n- 50 × 50 cm (20\" × 20\"), hidden zipper\n- 100% linen preferred; linen-cotton blend acceptable if ≥55% linen\n- Colors: oat, sea-glass, stripe (oat/white)\n- Retail price: $34\n- OEKO-TEX Standard 100 certification required\n\n## Please reply with\nDesigns/photos, materials, FOB unit price, MOQ, production lead time, sampling time & cost,\npayment terms, and port of loading.\n",
+  "brief_items": [
+    {
+      "sku": "A",
+      "name": "Ceramic table vase",
+      "requirements": "Height 25-30 cm, stoneware preferred; sea-glass green / sand / oat, matte or reactive glaze; watertight; must pass ISTA 1A drop-test packaging. Retail $48."
+    },
+    {
+      "sku": "B",
+      "name": "Linen throw pillow cover",
+      "requirements": "50x50 cm, hidden zipper; 100% linen preferred, blend acceptable if >=55% linen (hard requirement); OEKO-TEX Standard 100 required (hard requirement); oat / sea-glass / oat-white stripe. Retail $34."
+    }
+  ],
+  "vendors": [
+    {
+      "name": "Example Ceramics Co",
+      "email": "vendor-a@example.com",
+      "country": "VN"
+    },
+    {
+      "name": "Example Linens Ltd",
+      "email": "vendor-b@example.com",
+      "country": "IN"
+    }
+  ],
+  "costing": {
+    "forecast": {
+      "A": {
+        "season_units": 1800,
+        "season_weeks": 20,
+        "retail_price": 48.0
+      },
+      "B": {
+        "season_units": 1200,
+        "season_weeks": 20,
+        "retail_price": 34.0
+      }
+    },
+    "assumptions": {
+      "_note": "Illustrative planning assumptions for the hackathon demo. Duty/tariff rates are NOT verified; check the current HTSUS before real use.",
+      "today": "2026-11-07",
+      "po_date": "2026-12-01",
+      "in_store_date": "2027-03-15",
+      "receiving_buffer_days": 7,
+      "target_imu": 0.65,
+      "fx_to_usd": {
+        "USD": 1.0,
+        "CNY": 0.14,
+        "INR": 0.012,
+        "EUR": 1.08
+      },
+      "freight_per_unit_usd": {
+        "A": {
+          "CN": 0.95,
+          "VN": 1.05,
+          "PT": 1.6,
+          "IN": 1.1
+        },
+        "B": {
+          "CN": 0.3,
+          "VN": 0.32,
+          "PT": 0.45,
+          "IN": 0.35
+        }
+      },
+      "transit_days": {
+        "CN": 30,
+        "VN": 32,
+        "PT": 18,
+        "IN": 38
+      },
+      "duty_rate": {
+        "A": {
+          "CN": 0.06,
+          "VN": 0.06,
+          "PT": 0.06,
+          "IN": 0.06
+        },
+        "B": {
+          "CN": 0.119,
+          "VN": 0.119,
+          "PT": 0.119,
+          "IN": 0.119
+        }
+      },
+      "extra_tariff_rate": {
+        "CN": 0.25,
+        "VN": 0.0,
+        "PT": 0.0,
+        "IN": 0.0
+      },
+      "extra_dev_days": {
+        "accept": 0,
+        "modify": 21,
+        "co_develop": 45
+      },
+      "extra_dev_cost_usd": {
+        "accept": 0,
+        "modify": 400,
+        "co_develop": 1500
+      },
+      "excess_salvage_rate": 0.3,
+      "_salvage_note": "Units above forecast are assumed to recover 30% of landed cost (deep markdown / off-price)."
+    }
+  },
+  "deadline_hours": 72,
+  "created_by": "demo"
+}

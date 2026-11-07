@@ -1,6 +1,6 @@
 # Agent Flow — Solution Design (Draft v0.1)
 
-> **Status:** Draft for team review · **Scope:** Backend only (frontend designed separately) · **Stage:** Planning, no implementation
+> **Status:** Draft for team review · **Scope:** Backend only (frontend designed separately) · **Stage:** v0.1 implemented in `backend/` (see [`../README.md`](../README.md))
 > **Builds on:** [`workflow.png`](workflow.png) (the business process this agent flow automates)
 
 ---
@@ -278,10 +278,12 @@ stateDiagram-v2
 stateDiagram-v2
     direction LR
     state "VendorThread" as VT {
-        [*] --> RFQSent
-        RFQSent --> AwaitingReply
-        AwaitingReply --> FollowingUp: reply with gaps
-        FollowingUp --> AwaitingReply
+        [*] --> New
+        New --> AwaitingReply: RFQ sent
+        AwaitingReply --> ProcessingReply: vendor reply / reminder due
+        ProcessingReply --> AwaitingReply: follow-up sent
+        ProcessingReply --> Complete: checklist done
+        ProcessingReply --> Declined: vendor cannot quote
         AwaitingReply --> Complete: checklist done
         AwaitingReply --> Declined: vendor cannot quote
         AwaitingReply --> Stalled: no reply / max rounds
@@ -310,13 +312,15 @@ The frontend team designs the UI. The backend only commits to these capabilities
 
 | Need | How it maps |
 |---|---|
-| Three agents | Three ZooWork Agents, each with its own persona and `skill.md` platform Skill |
+| Three agents | Three ZooWork Agents. Each agent's `skill.md` is loaded as its persona (`AGENTS.md`) |
 | One session per vendor | One ZooWork Session per `VendorThread` on the Communication Agent |
-| Sending email | Email MCP server (remote HTTP) or an app-executed custom tool `send_email` |
-| Receiving email | Email provider inbound webhook → backend → `user.message` posted into that vendor's session |
-| Memory | Backend database exposed through custom tools (§6) |
-| Deterministic math | `tools/costing.py` run in the Analysis Agent's sandbox |
-| Waiting for vendors | Sessions sit idle between replies. A schedule or backend timer sends reminders and enforces the deadline |
+| Sending email | App-executed custom tool `send_email` → backend SMTP. The recipient is fixed by the backend |
+| Receiving email | Backend IMAP polling (no public URL needed), or `POST /inbound-email` for webhook providers → `user.message` posted into that vendor's session |
+| Memory | Backend SQLite database exposed through custom tools (§6) |
+| Deterministic math | `run_costing` custom tool executed by the backend (`backend/app/costing.py`, adapted from `tools/costing.py`) |
+| Waiting for vendors | Sessions sit idle between replies. A backend timer sends reminders, marks stalled threads, and enforces the deadline |
+
+> **Implementation:** see [`../README.md`](../README.md). All tools are ZooWork application-executed custom tools, so every side effect (email, database, math) stays in the backend and is scoped to the session's run and vendor.
 
 ---
 
