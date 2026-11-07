@@ -35,6 +35,11 @@ TAG_RE = re.compile(r"\[PD-([0-9a-f]{8})\]", re.I)
 MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
 
 
+def is_simulated_address(address: str | None) -> bool:
+    """Demo vendors use addresses ending in .sim; their mail is answered by app/vendor_sim.py, never sent."""
+    return (address or "").lower().rsplit("@", 1)[-1].endswith(".sim")
+
+
 def thread_tag(thread_id: str) -> str:
     return f"[PD-{thread_id.split('_')[-1][:8]}]"
 
@@ -116,6 +121,8 @@ class EmailService:
         self.s = settings
         self.db = db
         self.attachments_dir = settings.data_dir / "attachments"
+        # Called as listener(thread, row) after every outbound email is recorded (e.g. vendor simulator).
+        self.listeners: list[Any] = []
 
     # ---- outbound ------------------------------------------------------------------------
     def send(self, thread: dict[str, Any], subject: str, body: str) -> dict[str, Any]:
@@ -141,7 +148,9 @@ class EmailService:
             msg["References"] = " ".join(refs)
         msg.set_content(body)
 
-        if self.s.email_mode == "smtp":
+        if is_simulated_address(thread["vendor_email"]):
+            log.info("Simulated vendor %s: handed to the vendor simulator: %s", thread["vendor_email"], subject)
+        elif self.s.email_mode == "smtp":
             self._smtp_send(msg)
         else:
             log.info("EMAIL_MODE=%s: not sending to %s: %s", self.s.email_mode, thread["vendor_email"], subject)
@@ -154,6 +163,11 @@ class EmailService:
             "created_at": now_iso(),
         }
         self.db.insert("emails", row)
+        for listener in self.listeners:
+            try:
+                listener(thread, row)
+            except Exception:  # a listener must never break sending
+                log.exception("Outbound email listener failed")
         return row
 
     def _smtp_send(self, msg: EmailMessage) -> None:
@@ -188,7 +202,7 @@ class EmailService:
         """
         if not (self.s.imap_enabled and self.s.imap_host):
             return []
-        senders = self.open_vendor_addresses()
+        senders = [a for a in self.open_vendor_addresses() if not is_simulated_address(a)]
         if not senders:
             return []
         out: list[ParsedEmail] = []

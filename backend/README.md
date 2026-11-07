@@ -27,6 +27,8 @@ Start Sourcing Process (POST /runs)
 | `app/costing.py` | Landed cost, MOQ risk, timeline risk, score and ranking (no LLM math) |
 | `app/db.py` | SQLite schema: runs, threads, emails, vendor facts (versioned), offers, reports, decisions |
 | `app/main.py` | FastAPI app and background loops |
+| `examples/drinkware_demo_run.json` | Drinkware demo run used by `POST /demo/start` (simulated vendors) |
+| `app/vendor_sim.py`, `simulator/vendors.json` | Vendor simulator for the demo (see below) |
 | `examples/sample_run.json` | Example `POST /runs` body (Coastal Calm brief, placeholder vendor emails) |
 | `tests/` | Offline tests (fake ZooWork client, dry-run email) |
 
@@ -62,6 +64,36 @@ be injected with `POST /inbound-email` (requires `INBOUND_TOKEN`).
 
 Run status: `outreach → extracting → analyzing → awaiting_decision → accepted | denied_all` (or `needs_attention`).
 Thread status: `new → awaiting_reply ⇄ processing_reply → complete | declined | stalled`.
+
+## Demo: vendor simulator
+
+Six fictional drinkware vendors (`simulator/vendors.json`, addresses ending in `.sim`) answer the
+Communication Agent automatically, so a whole sourcing run plays out with no human input:
+
+| Vendor | Behaviour |
+|---|---|
+| Yongkang Steelware | Everything in the first reply (but a 3,000-unit MOQ) |
+| Saigon Drinkware | Forgets lead time and certifications → 1 follow-up |
+| Ningbo Polar | Terse, RMB and metric units → 2 follow-ups |
+| Taichung Craft | Ignores the RFQ → answers after the reminder |
+| Guangdong Lumi | Politely declines |
+| Shenzhen Hydra | Hides a prompt-injection attempt in its reply; cheapest, but only BPA-free |
+
+Code decides **what** each vendor reveals in each reply (deterministic, same demo every time).
+The `vendor_sim` ZooWork agent (`agents/vendor_sim/skill.md`) only writes the wording in the
+vendor's voice; with `SIM_MODE=scripted` or on any LLM error, templates write it instead.
+
+```bash
+# in .env: EMAIL_MODE=dry_run, IMAP_ENABLED=false, plus the compressed demo timing lines
+uvicorn app.main:app --port 8000
+curl -X POST localhost:8000/demo/start                     # simulated vendors only
+curl -X POST localhost:8000/demo/start -H 'Content-Type: application/json' \
+     -d '{"extra_vendors":[{"name":"Live Vendor","email":"teammate@gmail.com","country":"VN"}]}'  # + one real inbox
+```
+
+Mixing works because routing is per address: `.sim` vendors go to the simulator, every other
+address uses SMTP/IMAP as usual (needs `EMAIL_MODE=smtp` and IMAP settings for the real one).
+`GET /sim/vendors` lists the simulated vendors.
 
 ## Tests
 
