@@ -210,22 +210,54 @@ pages.offers = async () => {
   const vname = Object.fromEntries(run.threads.map(t => [t.id, t.vendor_name]));
   const items = Object.fromEntries((run.brief_items || []).map(i => [i.sku, i.name]));
   return `<header class="top"><div><h1>Products</h1><div class="sub">One row per product a vendor proposed, extracted by the Extraction Agent from the email threads.</div></div></header>
-  ${offers.length ? `<div class="card flush scroll-x"><table>
-    <thead><tr><th>Product</th><th>Vendor</th><th>Brief item</th><th class="right">Unit price</th><th class="right">MOQ</th><th class="right">Lead time</th><th>Path</th><th>Meets spec</th><th>Issues</th></tr></thead>
-    <tbody>${offers.map(o => `<tr>
-      <td><b>${esc(o.product_name)}</b><div class="muted small">${esc(o.design || '').slice(0, 90)}</div></td>
-      <td>${esc(vname[o.thread_id] || '')}<div class="muted small">${esc(o.country || '')}</div></td>
-      <td>${esc(o.brief_item)} <span class="muted small">${esc(items[o.brief_item] || '')}</span></td>
-      <td class="right num">${o.unit_price != null ? esc(o.currency || '') + ' ' + o.unit_price : '–'}<div class="muted small">${esc(o.incoterm || '')}</div></td>
-      <td class="right num">${o.moq != null ? Number(o.moq).toLocaleString() : '–'}</td>
-      <td class="right num">${o.production_days != null ? o.production_days + ' d' : '–'}</td>
-      <td>${esc(o.path || '')}</td>
-      <td>${o.meets_spec ? '<span class="pill p-good">yes</span>' : '<span class="pill p-bad">no</span>'}</td>
-      <td class="small">${(o.spec_issues || []).map(esc).join('<br>')}</td></tr>`).join('')}</tbody></table></div>`
+  ${offers.length ? productGroups(offers, vname, items)
     : `<div class="card empty">${ACTIVE.includes(run.status) && run.status === 'outreach'
         ? 'Products appear after every vendor conversation closes and the Extraction Agent runs. Follow progress in <a href="#mission">Mission control</a>.'
         : 'No products extracted yet.'}</div>`}`;
 };
+
+// Products page: one card per offer, grouped by brief item (same fields as the old table).
+const PATH_STYLE = {accept: 'path-accept', modify: 'path-modify', co_develop: 'path-codev'};
+function splitCode(name) {  // "TK3K53CTC Golden Doodle dog travel cup" -> ["TK3K53CTC", "Golden Doodle dog travel cup"]
+  const m = String(name || '').match(/^([A-Z0-9][A-Z0-9-]{3,})\s*[—–-]?\s+(.+)$/);
+  return m ? [m[1], m[2]] : ['', name || ''];
+}
+const initials = s => String(s || '?').split(/\s+/).filter(w => /^[A-Za-z]/.test(w)).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+function productCard(o, vname, items) {
+  const [code, name] = splitCode(o.product_name);
+  const vendor = vname[o.thread_id] || '';
+  const issues = o.spec_issues || [];
+  return `<article class="pcard ${o.meets_spec ? 'ok' : 'fail'}">
+    <div class="pc-head">
+      ${code ? `<span class="pc-code">${esc(code)}</span>` : ''}
+      <span class="spacer"></span>
+      ${o.meets_spec ? '<span class="pill p-good">✓ meets spec</span>' : '<span class="pill p-bad">✕ fails spec</span>'}
+    </div>
+    <h3 class="pc-name">${esc(name)}</h3>
+    ${o.design ? `<p class="pc-desc">${esc(o.design).slice(0, 90)}</p>` : ''}
+    <div class="pc-vendor"><span class="avatar">${esc(initials(vendor))}</span>
+      <div><b>${esc(vendor)}</b><div class="muted small">${esc(o.country || '')}</div></div>
+      <span class="spacer"></span><span class="pc-item" title="${esc(items[o.brief_item] || '')}">${esc(o.brief_item)}</span></div>
+    <div class="pc-stats">
+      <div><span class="l">Unit price</span><span class="v">${o.unit_price != null ? `<small>${esc(o.currency || '')}</small> ${o.unit_price}` : '–'}</span><span class="s">${esc(o.incoterm || '')}</span></div>
+      <div><span class="l">MOQ</span><span class="v">${o.moq != null ? Number(o.moq).toLocaleString() : '–'}</span><span class="s">${o.moq != null ? 'pcs' : ''}</span></div>
+      <div><span class="l">Lead time</span><span class="v">${o.production_days != null ? o.production_days : '–'}</span><span class="s">${o.production_days != null ? 'days' : ''}</span></div>
+    </div>
+    <div class="pc-foot">
+      <span class="pathpill ${PATH_STYLE[o.path] || ''}">${esc(o.path || '–')}</span>
+      ${issues.length ? `<details class="pc-issues"><summary>⚠ ${issues.length} issue${issues.length > 1 ? 's' : ''}</summary>
+        <ul>${issues.map(i => `<li>${esc(i)}</li>`).join('')}</ul></details>` : '<span class="muted small">No issues</span>'}
+    </div>
+  </article>`;
+}
+function productGroups(offers, vname, items) {
+  const groups = {};
+  offers.forEach(o => (groups[o.brief_item] = groups[o.brief_item] || []).push(o));
+  return Object.entries(groups).map(([sku, list]) => `<section class="pgroup">
+    <div class="pgroup-head"><h2>${esc(items[sku] || sku)}</h2><span class="pc-item">${esc(sku)}</span>
+      <span class="muted small">${list.length} product${list.length > 1 ? 's' : ''}</span></div>
+    <div class="pgrid">${list.map(o => productCard(o, vname, items)).join('')}</div></section>`).join('');
+}
 
 pages.report = async () => {
   if (!state.runId) return noRun();
@@ -239,32 +271,20 @@ pages.report = async () => {
   if (state.selectedFor !== run.id) { state.selected = new Set(rec); state.selectedFor = run.id; }
   const decided = run.decision;
   const items = Object.fromEntries((run.brief_items || []).map(i => [i.sku, i.name]));
-  const table = (sku, ids) => `<div class="card flush" style="margin-bottom:14px">
-    <div style="padding:12px 14px"><h2 style="margin:0">${esc(sku)} · ${esc(items[sku] || '')}</h2></div>
-    <div class="scroll-x"><table>
-    <thead><tr>${decided ? '' : '<th>Accept</th>'}<th>#</th><th>Image</th><th>Product</th><th>Vendor</th><th class="right">Landed</th><th class="right">Cost / sold unit</th><th class="right">Excess $</th><th class="right">Days late</th><th>Spec</th><th class="right">Score</th></tr></thead>
-    <tbody>${ids.map(id => byId[id]).filter(Boolean).map(o => `<tr>
-      ${decided ? '' : `<td><input type="checkbox" data-oid="${o.offer_id}" ${state.selected.has(o.offer_id) ? 'checked' : ''}></td>`}
-      <td>${o.rank_in_item ?? ''}</td>
-      <td>${thumbs((report.images || {})[o.offer_id])}</td>
-      <td><b>${esc(o.product_name)}</b> ${rec.has(o.offer_id) ? '<span class="rec" title="Recommended by the Analysis Agent">★ recommended</span>' : ''}
-        <details><summary>Why</summary><div class="small" style="margin-top:6px">${esc(o.assessment?.rationale || '')}</div>
-        ${(o.assessment?.risks || []).length ? `<ul class="small">${o.assessment.risks.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
-        ${(o.flags || []).length ? `<div class="small muted">Flags: ${o.flags.map(esc).join(' · ')}</div>` : ''}</details></td>
-      <td>${esc(o.vendor)}</td>
-      <td class="right num">${usd(o.landed_usd)}</td>
-      <td class="right num"><b>${usd(o.cost_per_sold_unit)}</b></td>
-      <td class="right num">${o.excess_cost_usd ? usd(o.excess_cost_usd) : '–'}</td>
-      <td class="right num">${o.days_late ?? '–'}</td>
-      <td>${o.meets_spec ? '<span class="pill p-good">meets</span>' : '<span class="pill p-bad">fails</span>'}</td>
-      <td class="right score">${o.score ?? '–'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const group = (sku, ids) => {
+    const list = ids.map(id => byId[id]).filter(Boolean);
+    return `<section class="pgroup">
+      <div class="pgroup-head"><h2>${esc(items[sku] || sku)}</h2><span class="pc-item">${esc(sku)}</span>
+        <span class="muted small">${list.length} product${list.length > 1 ? 's' : ''} · ranked</span></div>
+      <div class="pgrid rgrid">${list.map(o => rankCard(o, (report.images || {})[o.offer_id], rec.has(o.offer_id), !decided)).join('')}</div></section>`;
+  };
   return `<header class="top"><div><h1>Analysis &amp; decision</h1><div class="sub">Ranked by risk-adjusted cost per unit sold (landed cost + excess-MOQ cost + late-delivery margin loss). Weights: ${Object.entries(report.weights || {}).map(([k, v]) => `${esc(k)} ${v}`).join(' · ')}</div></div></header>
-  <div class="card" style="margin-bottom:14px"><h2>Agent's summary</h2><ul style="margin:0;padding-left:18px">${(report.executive_summary || []).map(s => `<li style="margin-bottom:6px">${esc(s)}</li>`).join('')}</ul></div>
-  ${Object.entries(report.ranking_by_item || {}).map(([sku, ids]) => table(sku, ids)).join('')}
+  <div class="summary-card"><div class="sc-kicker">🤖 Analysis Agent</div><h2>Agent's summary</h2><ul>${(report.executive_summary || []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
+  ${Object.entries(report.ranking_by_item || {}).map(([sku, ids]) => group(sku, ids)).join('')}
   <div class="grid g2" style="align-items:start">
-    <div class="card"><h2>Risks &amp; open questions</h2><ul class="small" style="margin:0;padding-left:18px">${(report.risks_and_open_questions || []).map(r => `<li style="margin-bottom:4px">${esc(r)}</li>`).join('')}</ul></div>
-    <div class="card">
-      <h2>Your decision</h2>
+    <div class="card risk-card"><h2>⚠️ Risks &amp; open questions</h2><ul class="small" style="margin:0;padding-left:18px">${(report.risks_and_open_questions || []).map(r => `<li style="margin-bottom:4px">${esc(r)}</li>`).join('')}</ul></div>
+    <div class="card decision-card">
+      <h2>🏁 Your decision</h2>
       ${decided ? `<div class="callout">🏁 <b>${decided.outcome === 'accepted' ? `Accepted ${decided.accepted_offer_ids.length} product(s)` : 'Denied all'}</b>
           ${decided.accepted_offer_ids.map(id => `<div>• ${esc(byId[id]?.product_name || id)} — ${esc(byId[id]?.vendor || '')}</div>`).join('')}
           ${decided.notes ? `<div class="muted small" style="margin-top:6px">${esc(decided.notes)}</div>` : ''}</div>`
@@ -279,6 +299,7 @@ pages.report = async () => {
 pages.report.after = root => {
   root.querySelectorAll('input[data-oid]').forEach(cb => cb.onchange = () => {
     cb.checked ? state.selected.add(cb.dataset.oid) : state.selected.delete(cb.dataset.oid);
+    cb.closest('.rcard')?.classList.toggle('sel', cb.checked);
     const b = $('#accept', root); if (b) b.textContent = `Accept ${state.selected.size} selected`;
   });
   const n = $('#notes', root); if (n) n.oninput = () => { state.notes = n.value; };
@@ -291,6 +312,38 @@ pages.report.after = root => {
   const d = $('#denyAll', root);
   if (d) d.onclick = () => confirm('Deny all products in this run?') && decide({outcome: 'denied_all', accepted_offer_ids: []});
 };
+
+function rankCard(o, photos, recommended, selectable) {
+  const [code, name] = splitCode(o.product_name);
+  const sel = state.selected && state.selected.has(o.offer_id);
+  const risks = o.assessment?.risks || [], flags = o.flags || [];
+  const photo = photos && photos.length
+    ? `<a href="${esc(photos[0])}" target="_blank" rel="noopener" class="rc-photo"><img src="${esc(photos[0])}" alt="Product photo" loading="lazy"></a>`
+    : '<div class="rc-photo none"><span>No photo from the vendor</span></div>';
+  return `<article class="pcard rcard ${o.meets_spec ? 'ok' : 'fail'} ${recommended ? 'is-rec' : ''} ${sel ? 'sel' : ''}">
+    <div class="rc-media">${photo}
+      <span class="rank-badge">#${o.rank_in_item ?? '–'}</span>
+      ${recommended ? '<span class="rec-ribbon" title="Recommended by the Analysis Agent">★ Recommended</span>' : ''}
+      ${photos && photos.length > 1 ? `<span class="photo-count">+${photos.length - 1} photo${photos.length > 2 ? 's' : ''}</span>` : ''}
+    </div>
+    <div class="pc-head">${code ? `<span class="pc-code">${esc(code)}</span>` : ''}<span class="spacer"></span>
+      ${o.meets_spec ? '<span class="pill p-good">✓ meets</span>' : '<span class="pill p-bad">✕ fails</span>'}</div>
+    <div class="rc-title"><h3 class="pc-name">${esc(name)}</h3>
+      <div class="ring" style="--p:${Math.max(0, Math.min(100, Number(o.score) || 0))}" title="Score"><span>${o.score ?? '–'}</span></div></div>
+    <div class="pc-vendor"><span class="avatar">${esc(initials(o.vendor))}</span><div><b>${esc(o.vendor)}</b></div></div>
+    <div class="pc-stats rc-stats">
+      <div><span class="l">Landed</span><span class="v">${usd(o.landed_usd)}</span></div>
+      <div class="hl"><span class="l">Cost / sold unit</span><span class="v">${usd(o.cost_per_sold_unit)}</span></div>
+      <div><span class="l">Excess $</span><span class="v">${o.excess_cost_usd ? usd(o.excess_cost_usd) : '–'}</span></div>
+      <div><span class="l">Days late</span><span class="v">${o.days_late ?? '–'}</span></div>
+    </div>
+    <details class="rc-why"><summary>Why this ranking</summary>
+      <div class="small" style="margin-top:6px">${esc(o.assessment?.rationale || '')}</div>
+      ${risks.length ? `<ul class="small">${risks.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
+      ${flags.length ? `<div class="small muted">Flags: ${flags.map(esc).join(' · ')}</div>` : ''}</details>
+    ${selectable ? `<label class="accept-toggle"><input type="checkbox" data-oid="${o.offer_id}" ${sel ? 'checked' : ''}><span>Accept this product</span></label>` : ''}
+  </article>`;
+}
 
 function thumbs(urls) {
   if (!urls || !urls.length) return '<div class="thumb none" title="The vendor sent no photo for this product">no photo</div>';
