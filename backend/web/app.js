@@ -57,29 +57,32 @@ pages.start = async () => {
   const [vendors, demo] = await Promise.all([api('/sim/vendors').catch(() => []), api('/demo/brief').catch(() => null)]);
   const replay = demo && demo.dataset === 'brightwell';
   return `
-  <div class="hero">
+  <div class="start-hero">
+    <div class="sc-kicker">New sourcing run</div>
     <h1>Start a sourcing run</h1>
-    <p class="sub">The agents email every vendor, chase missing information, extract and score the products, and come back to you with a recommendation.</p>
+    <p>The agents email every vendor, chase missing information, extract and score the products, and come back to you with a recommendation.</p>
   </div>
   <div class="grid g2" style="align-items:start">
-    <div class="card">
-      <h2>Vendors (${vendors.length})</h2>
-      <table><thead><tr><th>Vendor</th><th>Country</th></tr></thead><tbody>
-        ${vendors.map(v => `<tr><td><b>${esc(v.name)}</b><div class="muted small">${esc(v.email)}</div></td><td>${esc(v.country)}</td></tr>`).join('')
-          || '<tr><td colspan="2" class="muted">Vendor simulator is off (SIM_MODE=off).</td></tr>'}
-      </tbody></table>
+    <div class="card start-card">
+      <div class="pgroup-head" style="margin:0 0 12px"><h2>Vendors (${vendors.length})</h2></div>
+      <div class="svlist">${vendors.map(v => `<div class="svitem"><span class="avatar">${esc(initials(v.name))}</span>
+          <div style="min-width:0;flex:1"><b>${esc(v.name)}</b><div class="muted small sv-mail">${esc(v.email)}</div></div>
+          <span class="pc-item">${esc(v.country)}</span></div>`).join('')
+        || '<div class="muted">Vendor simulator is off (SIM_MODE=off).</div>'}</div>
     </div>
-    <div class="card">
+    <div class="card start-card brief-card">
       <h2>Brief</h2>
-      ${demo ? `<div class="small"><b>${esc(demo.title)}</b><br>
-        ${demo.brief_items.map(i => `${esc(i.name)}${i.requirements ? ` <span class="muted">· ${esc(i.requirements)}</span>` : ''}`).join('<br>')}</div>
-        ${demo.required_fields ? `<div class="muted small" style="margin-top:6px">Asks every vendor for ${demo.required_fields.length} fields per product.</div>` : ''}` : ''}
-      <label class="lbl">Optional: add a real vendor (they reply from a real inbox)</label>
-      <div class="grid" style="grid-template-columns:1fr 1.4fr 70px;gap:6px">
-        <input type="text" id="rvName" placeholder="Name"><input type="text" id="rvEmail" placeholder="email@example.com"><input type="text" id="rvCountry" placeholder="CN">
+      ${demo ? `<div class="brief-title">${esc(demo.title)}</div>
+        <div class="brief-items">${demo.brief_items.map(i => `<div class="brief-item"><b>${esc(i.name)}</b>${i.requirements ? `<span class="muted"> · ${esc(i.requirements)}</span>` : ''}</div>`).join('')}</div>
+        ${demo.required_fields ? `<div class="brief-fields">📋 Asks every vendor for <b>${demo.required_fields.length} fields</b> per product.</div>` : ''}` : ''}
+      <div class="real-vendor">
+        <label class="lbl" style="margin-top:0">Optional: add a real vendor (they reply from a real inbox)</label>
+        <div class="grid" style="grid-template-columns:1fr 1.4fr 70px;gap:6px">
+          <input type="text" id="rvName" placeholder="Name"><input type="text" id="rvEmail" placeholder="email@example.com"><input type="text" id="rvCountry" placeholder="CN">
+        </div>
+        <div class="muted small" style="margin-top:4px">Needs EMAIL_MODE=smtp and IMAP settings on the backend.</div>
       </div>
-      <div class="muted small" style="margin-top:4px">Needs EMAIL_MODE=smtp and IMAP settings on the backend.</div>
-      <div class="row" style="margin-top:18px"><span class="spacer"></span><button class="btn primary big" id="go">🚀 Start sourcing</button></div>
+      <button class="btn primary big go-btn" id="go">🚀 Start sourcing</button>
     </div>
   </div>`;
 };
@@ -142,29 +145,30 @@ pages.mission = async () => {
   const fresh = new Set(feed.filter(e => !state.seenEvents.has(e.id)).map(e => e.id));
   feed.forEach(e => state.seenEvents.add(e.id));
   return `${runHeader(run, events)}
-  <div class="grid g4" style="margin-bottom:14px">
-    <div class="card kpi"><div class="v">${closed} / ${run.threads.length}</div><div class="l">Vendor conversations closed</div></div>
-    <div class="card kpi"><div class="v">${count('email_out')}</div><div class="l">Emails sent by the agent</div></div>
-    <div class="card kpi"><div class="v">${count('email_in')}</div><div class="l">Vendor replies read</div></div>
-    <div class="card kpi"><div class="v">${followups}</div><div class="l">Follow-ups &amp; reminders (automatic)</div></div>
+  <div class="grid g4" style="margin-bottom:22px">
+    <div class="stat-tile t-teal"><span class="st-ico">✅</span><div><div class="v">${closed} / ${run.threads.length}</div><div class="l">Vendor conversations closed</div></div></div>
+    <div class="stat-tile t-violet"><span class="st-ico">📤</span><div><div class="v">${count('email_out')}</div><div class="l">Emails sent by the agent</div></div></div>
+    <div class="stat-tile t-blue"><span class="st-ico">📥</span><div><div class="v">${count('email_in')}</div><div class="l">Vendor replies read</div></div></div>
+    <div class="stat-tile t-amber"><span class="st-ico">🔔</span><div><div class="v">${followups}</div><div class="l">Follow-ups &amp; reminders (automatic)</div></div></div>
   </div>
   <div class="grid g-main" style="align-items:start">
     <div>
-      <h2>Vendors</h2>
+      <div class="pgroup-head"><h2>Vendors</h2><span class="muted small">${run.threads.length} conversations</span></div>
       <div class="vgrid">${run.threads.map(t => {
         const le = lastActivity[t.id];
-        return `<div class="vcard ${t.status === 'processing_reply' ? 'pulse' : ''}" data-tid="${t.id}">
-          <div class="row"><span class="nm">${esc(t.vendor_name)}</span><span class="spacer"></span><span class="muted small">${esc(t.country || '')}</span></div>
-          <div style="margin-top:6px">${tPill(t.status)}</div>
-          <div class="meta"><span>📤 ${t.outbound_count}</span><span>🔔 ${t.reminders_sent}</span>${t.last_inbound_at ? `<span>📥 ${time(t.last_inbound_at)}</span>` : ''}</div>
+        return `<div class="vcard st-${esc(t.status)} ${t.status === 'processing_reply' ? 'pulse' : ''}" data-tid="${t.id}">
+          <div class="vc-top"><span class="avatar">${esc(initials(t.vendor_name))}</span>
+            <div class="vc-name"><span class="nm">${esc(t.vendor_name)}</span><span class="muted small">${esc(t.country || '')}</span></div></div>
+          <div style="margin-top:10px">${tPill(t.status)}</div>
+          <div class="meta"><span class="chip-sm">📤 ${t.outbound_count}</span><span class="chip-sm">🔔 ${t.reminders_sent}</span>${t.last_inbound_at ? `<span class="chip-sm">📥 ${time(t.last_inbound_at)}</span>` : ''}</div>
           ${t.close_reason ? `<div class="muted small" style="margin-top:6px">${esc(t.close_reason).slice(0, 110)}</div>`
             : le ? `<div class="muted small" style="margin-top:6px">${eventText(le).slice(0, 90)}</div>` : ''}
         </div>`;
       }).join('')}</div>
     </div>
-    <div class="card">
-      <div class="row"><h2 style="margin:0">Agent activity</h2><span class="spacer"></span>${ACTIVE.includes(run.status) ? '<span class="live">LIVE</span>' : ''}</div>
-      <ul class="feed" style="max-height:560px;overflow:auto;margin-top:8px">${feed.map(e =>
+    <div class="card activity-card">
+      <div class="row"><h2 style="margin:0">🤖 Agent activity</h2><span class="spacer"></span>${ACTIVE.includes(run.status) ? '<span class="live">LIVE</span>' : ''}</div>
+      <ul class="feed timeline" style="max-height:560px;overflow:auto;margin-top:10px">${feed.map(e =>
         `<li class="${fresh.has(e.id) && state.lastHtml ? 'new' : ''}"><span class="t">${time(e.created_at)}</span><span class="ico">${EVENT_ICON[e.kind] || '•'}</span><div>${eventText(e)}</div></li>`).join('')}</ul>
     </div>
   </div>`;
@@ -182,18 +186,20 @@ pages.vendors = async (tid) => {
   const req = run.required_fields || [];
   return `<header class="top"><div><h1>Vendor conversations</h1><div class="sub">Every email the agent sent and received, and what it saved to Vendor Memory (with the source quote).</div></div></header>
   <div class="grid" style="grid-template-columns:250px 1fr;align-items:start">
-    <div class="card flush"><table><tbody>${run.threads.map(x => `<tr class="click ${x.id === tid ? 'sel' : ''}" data-tid="${x.id}">
-      <td><b>${esc(x.vendor_name)}</b><div style="margin-top:4px">${tPill(x.status)}</div></td></tr>`).join('')}</tbody></table></div>
+    <div class="vlist">${run.threads.map(x => `<div class="vlist-item click ${x.id === tid ? 'sel' : ''}" data-tid="${x.id}">
+      <span class="avatar">${esc(initials(x.vendor_name))}</span>
+      <div style="min-width:0"><b>${esc(x.vendor_name)}</b><div style="margin-top:4px">${tPill(x.status)}</div></div></div>`).join('')}</div>
     ${t ? `<div class="grid g2" style="align-items:start">
-      <div class="card">
-        <div class="row"><h2 style="margin:0">${esc(t.vendor_name)}</h2>${tPill(t.status)}</div>
-        <div class="muted small" style="margin:2px 0 8px">${esc(t.vendor_email)}${t.close_reason ? ' · ' + esc(t.close_reason) : ''}</div>
+      <div class="card convo-card">
+        <div class="convo-head"><span class="avatar lg">${esc(initials(t.vendor_name))}</span>
+          <div style="min-width:0;flex:1"><div class="row"><h2 style="margin:0">${esc(t.vendor_name)}</h2>${tPill(t.status)}</div>
+          <div class="muted small" style="margin-top:2px">${esc(t.vendor_email)}${t.close_reason ? ' · ' + esc(t.close_reason) : ''}</div></div></div>
         ${t.emails.map(e => `<div class="bubble ${e.direction}"><div class="h">${e.direction === 'out' ? '📤 Agent → vendor' : '📥 Vendor → agent'} · ${time(e.created_at)} · ${esc((e.subject || '').replace(/\[PD-[0-9a-f]+\]/gi, ''))}</div>${esc(e.body)}</div>`).join('')
           || '<div class="empty">No emails yet.</div>'}
       </div>
-      <div class="card">
-        <h2>Vendor Memory</h2>
-        ${(t.memory.products || []).map(p => `<div style="margin-bottom:14px">
+      <div class="card memory-card">
+        <h2>🧠 Vendor Memory</h2>
+        ${(t.memory.products || []).map(p => `<div class="mem-product ${p.missing_fields?.length ? 'gaps' : 'full'}">
           <div class="row"><b>${esc(p.product_ref)}</b><span class="spacer"></span>${p.missing_fields?.length ? `<span class="pill p-warn">${p.missing_fields.length} missing</span>` : '<span class="pill p-good">all fields</span>'}</div>
           ${req.map(f => { const x = p.fields?.[f]; return `<div class="factrow"><span class="muted">${esc(f)}</span>
             <span>${x ? `${esc(val(x.value))}${x.quote ? `<div class="q">“${esc(x.quote).slice(0, 120)}”</div>` : ''}` : '<span class="pill p-bad">missing</span>'}</span></div>`; }).join('')}
@@ -201,7 +207,7 @@ pages.vendors = async (tid) => {
       </div></div>` : '<div class="empty">No vendors.</div>'}
   </div>`;
 };
-pages.vendors.after = root => root.querySelectorAll('tr[data-tid]').forEach(tr => tr.onclick = () => { location.hash = 'vendors/' + tr.dataset.tid; });
+pages.vendors.after = root => root.querySelectorAll('[data-tid]').forEach(tr => tr.onclick = () => { location.hash = 'vendors/' + tr.dataset.tid; });
 
 pages.offers = async () => {
   if (!state.runId) return noRun();
@@ -313,6 +319,8 @@ pages.report.after = root => {
   if (d) d.onclick = () => confirm('Deny all products in this run?') && decide({outcome: 'denied_all', accepted_offer_ids: []});
 };
 
+// Score colour: high (>= 75) green, middle (50-74) yellow, low (< 50) red.
+const scoreBand = v => v == null ? 'band-none' : v >= 75 ? 'band-hi' : v >= 50 ? 'band-mid' : 'band-lo';
 function rankCard(o, photos, recommended, selectable) {
   const [code, name] = splitCode(o.product_name);
   const sel = state.selected && state.selected.has(o.offer_id);
@@ -329,7 +337,7 @@ function rankCard(o, photos, recommended, selectable) {
     <div class="pc-head">${code ? `<span class="pc-code">${esc(code)}</span>` : ''}<span class="spacer"></span>
       ${o.meets_spec ? '<span class="pill p-good">✓ meets</span>' : '<span class="pill p-bad">✕ fails</span>'}</div>
     <div class="rc-title"><h3 class="pc-name">${esc(name)}</h3>
-      <div class="ring" style="--p:${Math.max(0, Math.min(100, Number(o.score) || 0))}" title="Score"><span>${o.score ?? '–'}</span></div></div>
+      <div class="ring ${scoreBand(o.score)}" style="--p:${Math.max(0, Math.min(100, Number(o.score) || 0))}" title="Score: ${o.score ?? '–'} (green ≥ 75 · yellow 50–74 · red < 50)"><span>${o.score ?? '–'}</span></div></div>
     <div class="pc-vendor"><span class="avatar">${esc(initials(o.vendor))}</span><div><b>${esc(o.vendor)}</b></div></div>
     <div class="pc-stats rc-stats">
       <div><span class="l">Landed</span><span class="v">${usd(o.landed_usd)}</span></div>
